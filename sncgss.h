@@ -82,9 +82,17 @@ typedef uint32_t sapgss_qop_t;
 /* Exported library routines */
 uint32_t sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n);
 
-uint32_t sapsnc_export_cname_blob();
+uint32_t sapsnc_export_cname_blob(
+	uint32_t *,
+	sapgss_name_t,
+	sapgss_buffer_t,
+	int);
 
-uint32_t sapsnc_import_cname_blob();
+uint32_t sapsnc_import_cname_blob(
+	uint32_t *,
+	sapgss_buffer_t
+	sapgss_name_t
+	int);
 
 uint32_t sapgss_acquire_cred(
 	uint32_t *minor_status,
@@ -297,23 +305,23 @@ uint32_t sapgss_inquire_names_for_mech(
 
 uint32_t sapgss_inquire_mechs_for_name(
 	uint32_t *minor_status,
-	const sapgss_name_t input_name,
+	sapgss_name_t input_name,
 	sapgss_OID_set *mech_types);
 
 uint32_t sapgss_canonicalize_name(
 	uint32_t *minor_status,
-	const sapgss_name_t input_name,
-	const sapgss_OID mech_type,
+	sapgss_name_t input_name,
+	sapgss_OID mech_type,
 	sapgss_name_t *output_name);
 
 uint32_t sapgss_export_name(
 	uint32_t *minor_status,
-	const sapgss_name_t input_name,
+	sapgss_name_t input_name,
 	sapgss_buffer_t exported_name);
 
 uint32_t sapgss_duplicate_name(
 	uint32_t *minor_status,
-	const sapgss_name_t input_name,
+	sapgss_name_t input_name,
 	sapgss_name_t *dest_name);
 
 #endif /* SNCGSS_H */

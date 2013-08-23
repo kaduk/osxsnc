@@ -79,4 +79,79 @@ typedef int sapgss_cred_usage_t;
 typedef uint32_t sapgss_qop_t;
 #endif
 
+/* Exported library routines */
+uint32_t sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n);
+
+uint32_t sapsnc_export_cname_blob();
+
+uint32_t sapsnc_import_cname_blob();
+
+uint32_t sapgss_acquire_cred();
+
+uint32_t sapgss_release_cred();
+
+uint32_t sapgss_init_sec_context();
+
+uint32_t sapgss_accept_sec_context();
+
+uint32_t sapgss_process_context_token();
+
+uint32_t sapgss_delete_sec_context();
+
+uint32_t sapgss_context_time();
+
+uint32_t sapgss_get_mic();
+
+uint32_t sapgss_verify_mic();
+
+uint32_t sapgss_wrap();
+
+uint32_t sapgss_unwrap();
+
+uint32_t sapgss_display_status();
+
+uint32_t sapgss_indicate_mechs();
+
+uint32_t sapgss_compare_name();
+
+uint32_t sapgss_display_name();
+
+uint32_t sapgss_import_name();
+
+uint32_t sapgss_release_name();
+
+uint32_t sapgss_relesae_buffer();
+
+uint32_t sapgss_release_oid_set();
+
+uint32_t sapgss_inquire_cred();
+
+uint32_t sapgss_add_cred();
+
+uint32_t sapgss_inquire_cred_by_mech();
+
+uint32_t sapgss_inquire_context();
+
+uint32_t sapgss_wrap_size_limit();
+
+uint32_t sapgss_export_sec_context();
+
+uint32_t sapgss_import_sec_context();
+
+uint32_t sapgss_create_empty_oid_set();
+
+uint32_t sapgss_add_oid_set_member();
+
+uint32_t sapgss_test_oid_set_member()
+
+uint32_t sapgss_inquire_names_for_mech();
+
+uint32_t sapgss_inquire_mechs_for_name();
+
+uint32_t sapgss_canonicalize_name();
+
+uint32_t sapgss_export_name();
+
+uint32_t sapgss_duplicate_name();
+
 #endif /* SNCGSS_H */

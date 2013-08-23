@@ -44,7 +44,9 @@ struct sapgss_info_s {
     int major_rev;
     int minor_rev;
     char *adapter_name;
-    SAPGSS_MECH_ID mech_id;
+    enum {
+	ID_KADUK = 24729;
+    } mech_id;
     char integ_avail;
     char conf_avail;
     char unused;

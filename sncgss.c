@@ -42,65 +42,8 @@
  * incompatible.
  */
 
-/* SNC Adaptor description, as described in upstream's header. */
-struct sapgss_info_s {
-    int major_rev;
-    int minor_rev;
-    char *adapter_name;
-    SAPGSS_MECH_ID mech_id;
-    char integ_avail;
-    char conf_avail;
-    char unused;
-    char export_sec_context;
-    uint_32_t unused1;
-    sapgss_OID_desc *nt_canonical_name;
-    sapgss_OID_desc *pad[4];
-    char *mech_prefix_string;
-    char mutual_auth;
-    char replay_prot;
-    char reserved[2];
-    sapgss_OID_desc *mech_oid;
-};
-
-/* Copies of GSS structures to get the native-aligned ABI */
-#if 0 /* This should be ABI-compatible with 16-bit and native alignment */
-typedef struct sapgss_buffer_desc_struct {
-    size_t length;
-    void *value;
-} sapgss_buffer_desc, *sapgss_buffer_t;
-#endif
-
-typedef struct sapgss_OID_desc_struct {
-    uint32_t length;
-    void *elements;
-} *sapgss_OID;
-
-typedef struct sapgss_OID_set_desc_struct {
-    size_t count;
-    sapgss_OID elements;
-} *sapgss_OID_set;
-
-typedef struct sapgss_channel_bindings_struct {
-    uint32_t initiator_addrtype;
-    gss_buffer_desc initiator_address;
-    uint32_t acceptor_addrtype;
-    gss_buffer_desc acceptor_address;
-    gss_buffer_desc application_data;
-} *sapgss_channel_bindings_t;
-
-#if 0 /* This should be ABI-compatible with 16-bit and native alignment */
-struct sapgss_name_struct;
-typedef struct sapgss_name_struct *sapgss_name_t;
-
-struct sapgss_cred_id_struct;
-typedef struct sapgss_cred_id_struct *sapgss_cred_id_t;
-
-struct sapgss_ctx_id_struct;
-typedef struct sapgss_ctx_id_struct *sapgss_ctx_id_t;
-
-typedef int sapgss_cred_usage_t;
-typedef uint32_t sapgss_qop_t;
-#endif
+#include <gssapi/gssapi.h>
+#include "sncgss.h"
 
 /* Exported library routines */
 uint32_t sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n);

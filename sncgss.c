@@ -58,24 +58,66 @@ sapgss_OID_desc gss_mech_krb5 =
 static void
 gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 {
+    /* XXX We should be using interned strings; single OIDs returned
+     * by the local library are generally not freed.  This version leaks
+     * memory. */
+    *loc = calloc(1, sizeof(**loc));
+    (*loc)->elements = malloc(sap->length);
+    memcpy((*loc)->elements, sap->elements, sap->length);
+    (*loc)->length = sap->length;
     return;
 }
 
 static void
 gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
 {
+    /* XXX memory leaks here, too. */
+    *sap = calloc(1, sizeof(**sap));
+    (*sap)->elements = malloc(loc->length);
+    memcpy((*sap)->elements, loc->elements, loc->length);
+    (*sap)->length = loc->length;
     return;
 }
 
 static void
 gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
 {
+    sapgss_OID s;
+    gss_OID e;
+    size_t i;
+
+    *loc = calloc(1, sizeof(**loc));
+    (*loc)->elements = calloc(sap->count, sizeof(gss_OID_desc));
+    for(i = 0; i < sap->count; ++i) {
+	s = &sap->elements[i];
+	e = &(*loc)->elements[i];
+	e->elements = malloc(s->length);
+	memcpy(e->elements, s->elements, s->length);
+	e->length = s->length;
+    }
+    /* XXX we leak memory.  Can't free sap with this API, though. */
+    /* dummy1 = sapgss_release_oid_set(&dummy2, &sap); */
     return;
 }
 
 static void
 gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
 {
+    sapgss_OID s;
+    gss_OID e;
+    size_t i;
+
+    *sap = calloc(1, sizeof(**sap));
+    (*sap)->elements = calloc(loc->count, sizeof(sapgss_OID_desc));
+    for(i = 0; i < loc->count; ++i) {
+	e = &loc->elements[i];
+	s = &(*sap)->elements[i];
+	s->elements = malloc(e->length);
+	memcpy(s->elements, e->elements, e->length);
+	s->length = e->length;
+    }
+    /* XXX we leak memory.  Can't free loc with this API, though. */
+    /* dummy1 = gss_release_oid_set(&dummy2, &sap); */
     return;
 }
 

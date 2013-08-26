@@ -54,6 +54,31 @@ sapgss_OID_desc krb5_nt_principal_name =
 sapgss_OID_desc gss_mech_krb5 =
     {9, "\052\206\110\206\367\022\001\002\002"};
 
+/* Local helper routines */
+static void
+gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
+{
+    return;
+}
+
+static void
+gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
+{
+    return;
+}
+
+static void
+gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
+{
+    return;
+}
+
+static void
+gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
+{
+    return;
+}
+
 /* Exported library routines */
 uint32_t
 sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)

@@ -45,10 +45,34 @@
 #include <gssapi/gssapi.h>
 #include "sncgss.h"
 
+/* GSS_KRB5_NT_PRINCIPAL_NAME */
+sapgss_OID_desc krb5_nt_principal_name =
+    {10, "\052\206\110\206\367\022\001\002\002\001"};
+/* The real one */
+sapgss_OID_desc gss_mech_krb5 =
+    {9, "\052\206\110\206\367\022\001\002\002"};
+
 /* Exported library routines */
 uint32_t
 sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
 {
+    if (info == NULL || len < sizeof(*info))
+	return 1;
+    /* else */
+    memset(info, 0, len);
+    info->major_rev = 1;
+    info->minor_rev = 0;
+    info->adapter_name = "OS X krb5 compat shim";
+    info->mech_id = ID_KADUK;
+    info->integ_avail = 1;
+    info->conf_avail = 1;
+    info->export_set_context = 1;
+    info->nt_canonical_name = &krb5_nt_principal_name;
+    info->mech_prefix_string = "krb5";
+    info->mutual_auth = 1;
+    info->replay_prot = 1;
+    info->mech_oid = &gss_mech_krb5;
+    return 0;
 }
 
 uint32_t

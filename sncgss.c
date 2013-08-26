@@ -66,7 +66,7 @@ sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
     info->mech_id = ID_KADUK;
     info->integ_avail = 1;
     info->conf_avail = 1;
-    info->export_set_context = 1;
+    info->export_sec_context = 1;
     info->nt_canonical_name = &krb5_nt_principal_name;
     info->mech_prefix_string = "krb5";
     info->mutual_auth = 1;
@@ -108,6 +108,19 @@ sapgss_acquire_cred(
     sapgss_OID_set *actual_mechs,
     uint32_t *time_rec)
 {
+    gss_OID_set desired_mechs_loc;
+    gss_OID_set actual_mechs_loc;
+    uint32_t major_status;
+    
+    memset(&desired_mechs_loc, 0, sizeof(desired_mechs_loc));
+    memset(&actual_mechs_loc, 0, sizeof(actual_mechs_loc));
+    gss_OID_set_sap_to_loc(desired_mechs, &desired_mechs_loc);
+    major_status = gss_acquire_cred(minor_status, desired_name, time_req,
+				    desired_mechs_loc, cred_usage,
+				    output_cred_handle, &actual_mechs_loc,
+				    time_rec);
+    gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    return major_status;
 }
 
 uint32_t
@@ -115,6 +128,7 @@ sapgss_release_cred(
     uint32_t *minor_status,
     gss_cred_id_t *cred_handle)
 {
+    return gss_release_cred(minor_status, cred_handle);
 }
 
 uint32_t
@@ -133,6 +147,23 @@ sapgss_init_sec_context(
     uint32_t *ret_flags,
     uint32_t *time_rec)
 {
+    gss_OID mech_type_loc, actual_mech_type_loc;
+    uint32_t major_status;
+
+    memset(&mech_type_loc, 0, sizeof(mech_type_loc));
+    actual_mech_type_loc = NULL;
+    /* Hope nobody uses these */
+    if (input_chan_bindings != NULL)
+	return GSS_S_FAILURE;
+    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    major_status = gss_init_sec_context(minor_status, claimant_cred_handle,
+					context_handle, target_name,
+					mech_type_loc, req_flags, time_req,
+					NULL, input_token,
+					&actual_mech_type_loc, output_token,
+	    				ret_flags, time_rec);
+    gss_OID_loc_to_sap(actual_mech_type_loc, actual_mech_type);
+    return major_status;
 }
 
 uint32_t
@@ -149,14 +180,30 @@ sapgss_accept_sec_context(
     uint32_t *time_rec,
     gss_cred_id_t *delegated_cred_handle)
 {
+    gss_OID mech_type_loc;
+    uint32_t major_status;
+
+    memset(&mech_type_loc, 0, sizeof(mech_type_loc));
+    if (input_chan_bindings != NULL)
+	return GSS_S_FAILURE;
+    major_status = gss_accept_sec_context(minor_status, context_handle,
+					  acceptor_cred_handle,
+					  input_token_buffer,
+					  NULL, src_name, &mech_type_loc,
+					  output_token, ret_flags, time_rec,
+					  delegated_cred_handle);
+    gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    return major_status;
 }
 
 uint32_t
 sapgss_process_context_token(
     uint32_t *minor_status,
-    gss_ctx_id_t context_handle
+    gss_ctx_id_t context_handle,
     gss_buffer_t token_buffer)
 {
+    return gss_process_context_token(minor_status, context_handle,
+				     token_buffer);
 }
 
 uint32_t
@@ -165,6 +212,7 @@ sapgss_delete_sec_context(
     gss_ctx_id_t *context_handle,
     gss_buffer_t token_buffer)
 {
+    return gss_delete_sec_context(minor_status, context_handle, token_buffer);
 }
 
 uint32_t
@@ -173,6 +221,7 @@ sapgss_context_time(
     gss_ctx_id_t context_handle,
     uint32_t *time_rec)
 {
+    return gss_context_time(minor_status, context_handle, time_rec);
 }
 
 uint32_t
@@ -183,6 +232,8 @@ sapgss_get_mic(
     gss_buffer_t message_buffer,
     gss_buffer_t message_token)
 {
+    return gss_get_mic(minor_status, context_handle, qop_req, message_buffer,
+		       message_token);
 }
 
 uint32_t
@@ -193,6 +244,8 @@ sapgss_verify_mic(
     gss_buffer_t message_token,
     gss_qop_t *qop_state)
 {
+    return gss_verify_mic(minor_status, context_handle, message_buffer,
+			  message_token, qop_state);
 }
 
 uint32_t
@@ -205,6 +258,8 @@ sapgss_wrap(
     int *conf_state,
     gss_buffer_t output_message_buffer)
 {
+    return gss_wrap(minor_status, context_handle, conf_req_flag, qop_req,
+		    input_message_buffer, conf_state, output_message_buffer);
 }
 
 uint32_t
@@ -216,6 +271,8 @@ sapgss_unwrap(
     int *conf_state,
     gss_qop_t *qop_state)
 {
+    return gss_unwrap(minor_status, context_handle, input_message_buffer,
+		      output_message_buffer, conf_state, qop_state);
 }
 
 uint32_t
@@ -227,6 +284,11 @@ sapgss_display_status(
     uint32_t *message_context,
     gss_buffer_t status_string)
 {
+    gss_OID mech_type_loc;
+
+    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    return gss_display_status(minor_status, status_value, status_type,
+			      mech_type_loc, message_context, status_string);
 }
 
 uint32_t
@@ -234,6 +296,13 @@ sapgss_indicate_mechs(
     uint32_t *minor_status,
     sapgss_OID_set *mech_set)
 {
+    gss_OID_set mech_set_loc;
+    uint32_t major_status;
+
+    memset(&mech_set_loc, 0, sizeof(mech_set_loc));
+    major_status = gss_indicate_mechs(minor_status, &mech_set_loc);
+    gss_OID_set_loc_to_sap(mech_set_loc, mech_set);
+    return major_status;
 }
 
 uint32_t
@@ -243,6 +312,7 @@ sapgss_compare_name(
     gss_name_t name2,
     int *name_equal)
 {
+    return gss_compare_name(minor_status, name1, name2, name_equal);
 }
 
 uint32_t
@@ -252,6 +322,13 @@ sapgss_display_name(
     gss_buffer_t output_name_buffer,
     sapgss_OID *output_name_type)
 {
+    gss_OID output_name_type_loc;
+    uint32_t major_status;
+
+    major_status = gss_display_name(minor_status, input_name,
+				    output_name_buffer, &output_name_type_loc);
+    gss_OID_loc_to_sap(output_name_type_loc, output_name_type);
+    return major_status;
 }
 
 uint32_t
@@ -261,6 +338,11 @@ sapgss_import_name(
     sapgss_OID input_name_type,
     gss_name_t *output_name)
 {
+    gss_OID input_name_type_loc;
+
+    gss_OID_sap_to_loc(input_name_type, &input_name_type_loc);
+    return gss_import_name(minor_status, input_name_buffer,
+			   input_name_type_loc, output_name);
 }
 
 uint32_t
@@ -268,6 +350,7 @@ sapgss_release_name(
     uint32_t *minor_status,
     gss_name_t *input_name)
 {
+    return gss_release_name(minor_status, input_name);
 }
 
 uint32_t
@@ -275,13 +358,25 @@ sapgss_relesae_buffer(
     uint32_t *minor_status,
     gss_buffer_t buffer)
 {
+    return gss_release_buffer(minor_status, buffer);
 }
 
+/* This must be entirely custom, as all OIDs that are returned to SAP
+ * are allocated by the shim layer, and must be freed by the shim layer. */
 uint32_t
 sapgss_release_oid_set(
     uint32_t *minor_status,
     sapgss_OID_set *set)
 {
+    size_t i;
+
+    for(i = 0; i < (*set)->count; ++i)
+	free((*set)->elements[i].elements);
+    free((*set)->elements);
+    free(*set);
+    *set = NULL;
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
 }
 
 uint32_t
@@ -293,6 +388,13 @@ sapgss_inquire_cred(
     gss_cred_usage_t *cred_usage,
     sapgss_OID_set *mechanisms)
 {
+    gss_OID_set mechanisms_loc;
+    uint32_t major_status;
+
+    major_status = gss_inquire_cred(minor_status, cred_handle, name, lifetime,
+				    cred_usage, &mechanisms_loc);
+    gss_OID_set_loc_to_sap(mechanisms_loc, mechanisms);
+    return major_status;
 }
 
 uint32_t
@@ -309,6 +411,18 @@ sapgss_add_cred(
     uint32_t *initiator_time_rec,
     uint32_t *acceptor_time_rec)
 {
+    gss_OID desired_mech_loc;
+    gss_OID_set actual_mechs_loc;
+    uint32_t major_status;
+
+    gss_OID_sap_to_loc(desired_mech, &desired_mech_loc);
+    major_status = gss_add_cred(minor_status, input_cred_handle, desired_name,
+				desired_mech_loc, cred_usage,
+				initiator_time_req, acceptor_time_req,
+				output_cred_handle, &actual_mechs_loc,
+				initiator_time_rec, acceptor_time_rec);
+    gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    return major_status;
 }
 
 uint32_t
@@ -321,6 +435,12 @@ sapgss_inquire_cred_by_mech(
     uint32_t *acceptor_lifetime,
     gss_cred_usage_t *cred_usage)
 {
+    gss_OID mech_type_loc;
+
+    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    return gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type_loc,
+				    name, initiator_lifetime,
+				    acceptor_lifetime, cred_usage);
 }
 
 uint32_t
@@ -335,6 +455,14 @@ sapgss_inquire_context(
     int *locally_initiated,
     int *open)
 {
+    gss_OID mech_type_loc;
+    uint32_t major_status;
+
+    major_status = gss_inquire_context(minor_status, context_handle, src_name,
+				       targ_name, lifetime_rec, &mech_type_loc,
+				       ctx_flags, locally_initiated, open);
+    gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    return major_status;
 }
 
 uint32_t
@@ -343,9 +471,11 @@ sapgss_wrap_size_limit(
     gss_ctx_id_t context_handle,
     int conf_req_flag,
     gss_qop_t qop_req,
-    uint32_t req_output_size
+    uint32_t req_output_size,
     uint32_t *max_input_size)
 {
+    return gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
+			       qop_req, req_output_size, max_input_size);
 }
 
 uint32_t
@@ -354,6 +484,8 @@ sapgss_export_sec_context(
     gss_ctx_id_t *context_handle,
     gss_buffer_t interprocess_token)
 {
+    return gss_export_sec_context(minor_status, context_handle,
+				  interprocess_token);
 }
 
 uint32_t
@@ -362,21 +494,44 @@ sapgss_import_sec_context(
     gss_buffer_t interprocess_token,
     gss_ctx_id_t *context_handle)
 {
+    return gss_import_sec_context(minor_status, interprocess_token,
+				  context_handle);
 }
 
+/* We must roll this ourselves */
 uint32_t
 sapgss_create_empty_oid_set(
     uint32_t *minor_status,
     sapgss_OID_set *oid_set)
 {
+    oid_set = calloc(1, sizeof(*oid_set));
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
 }
 
+/* Assumes [mc]alloc() never fails */
 uint32_t
 sapgss_add_oid_set_member(
     uint32_t *minor_status,
     sapgss_OID member_oid,
     sapgss_OID_set *oid_set)
 {
+    sapgss_OID list, last;
+    size_t count;
+
+    list = (*oid_set)->elements;
+    count = (*oid_set)->count;
+    /* calloc does overflow checking */
+    (*oid_set)->elements = calloc(count, sizeof(sapgss_OID_desc));
+    memcpy((*oid_set)->elements, list, count * sizeof(sapgss_OID_desc));
+    last = &(*oid_set)->elements[count];
+    last->elements = malloc(member_oid->length);
+    memcpy(last->elements, member_oid->elements, member_oid->length);
+    last->length = member_oid->length;
+    (*oid_set)->count++;
+    free(list);
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
 }
 
 uint32_t
@@ -385,6 +540,22 @@ sapgss_test_oid_set_member(
     sapgss_OID member,
     sapgss_OID_set set,
     int *present)
+{
+    size_t i;
+
+    for(i = 0; i < set->count; ++i) {
+	if (set->elements[i].length == member->length &&
+	    memcmp(set->elements[i].elements, member->elements,
+		member->length) != 0) {
+	    *present = 1;
+	    *minor_status = 0;
+	    return GSS_S_COMPLETE;
+	}
+    }
+    *minor_status = 0;
+    *present = 0;
+    return GSS_S_COMPLETE;
+}
 
 uint32_t
 sapgss_inquire_names_for_mech(
@@ -392,6 +563,15 @@ sapgss_inquire_names_for_mech(
     sapgss_OID mechanism,
     sapgss_OID_set *name_types)
 {
+    gss_OID mechanism_loc;
+    gss_OID_set name_types_loc;
+    uint32_t major_status;
+
+    gss_OID_sap_to_loc(mechanism, &mechanism_loc);
+    major_status = gss_inquire_names_for_mech(minor_status, mechanism_loc,
+					      &name_types_loc);
+    gss_OID_set_loc_to_sap(name_types_loc, name_types);
+    return major_status;
 }
 
 uint32_t
@@ -400,6 +580,13 @@ sapgss_inquire_mechs_for_name(
     gss_name_t input_name,
     sapgss_OID_set *mech_types)
 {
+    gss_OID_set mech_types_loc;
+    uint32_t major_status;
+
+    major_status = gss_inquire_mechs_for_name(minor_status, input_name,
+					      &mech_types_loc);
+    gss_OID_set_loc_to_sap(mech_types_loc, mech_types);
+    return major_status;
 }
 
 uint32_t
@@ -409,6 +596,11 @@ sapgss_canonicalize_name(
     sapgss_OID mech_type,
     gss_name_t *output_name)
 {
+    gss_OID mech_type_loc;
+
+    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    return gss_canonicalize_name(minor_status, input_name, mech_type_loc,
+				 output_name);
 }
 
 uint32_t
@@ -417,6 +609,7 @@ sapgss_export_name(
     gss_name_t input_name,
     gss_buffer_t exported_name)
 {
+    return gss_export_name(minor_status, input_name, exported_name);
 }
 
 uint32_t
@@ -425,4 +618,5 @@ sapgss_duplicate_name(
     gss_name_t input_name,
     gss_name_t *dest_name)
 {
+    return gss_duplicate_name(minor_status, input_name, dest_name);
 }

@@ -72,7 +72,7 @@ typedef struct sapgss_buffer_desc_struct {
 typedef struct sapgss_OID_desc_struct {
     uint32_t length;
     void *elements;
-} *sapgss_OID;
+} sapgss_OID_desc, *sapgss_OID;
 
 typedef struct sapgss_OID_set_desc_struct {
     size_t count;

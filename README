@@ -1,3 +1,7 @@
 This repository contains code to build a shim SNC adapter that
 bridges between the SAP-expected ABI (with default alignment) and
 the 16-bit aligned GSS-API libraries which are common on OS X.
+
+Build the library with:
+cc sncgss.c -c -Wall
+cc -dynamiclib -o sncgss.dyld sncgss.o  -dynamic -Wl,-search_paths_first -framework GSS

@@ -112,8 +112,8 @@ uint32_t sapsnc_export_cname_blob(
 
 uint32_t sapsnc_import_cname_blob(
 	uint32_t *,
-	gss_buffer_t
-	gss_name_t
+	gss_buffer_t,
+	gss_name_t,
 	int);
 
 uint32_t sapgss_acquire_cred(
@@ -160,7 +160,7 @@ uint32_t sapgss_accept_sec_context(
 
 uint32_t sapgss_process_context_token(
 	uint32_t *minor_status,
-	gss_ctx_id_t context_handle
+	gss_ctx_id_t context_handle,
 	gss_buffer_t token_buffer);
 
 uint32_t sapgss_delete_sec_context(
@@ -292,7 +292,7 @@ uint32_t sapgss_wrap_size_limit(
 	gss_ctx_id_t context_handle,
 	int conf_req_flag,
 	gss_qop_t qop_req,
-	uint32_t req_output_size
+	uint32_t req_output_size,
 	uint32_t *max_input_size);
 
 uint32_t sapgss_export_sec_context(
@@ -318,7 +318,7 @@ uint32_t sapgss_test_oid_set_member(
 	uint32_t *minor_status,
 	sapgss_OID member,
 	sapgss_OID_set set,
-	int *present)
+	int *present);
 
 uint32_t sapgss_inquire_names_for_mech(
 	uint32_t *minor_status,

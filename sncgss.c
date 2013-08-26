@@ -42,6 +42,8 @@
  * incompatible.
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include <gssapi/gssapi.h>
 #include "sncgss.h"
 

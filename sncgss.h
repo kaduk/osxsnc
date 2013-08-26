@@ -39,28 +39,6 @@
 #ifndef SNCGSS_H
 #define SNCGSS_H
 
-/* SNC Adaptor description, as described in upstream's header. */
-struct sapgss_info_s {
-    int major_rev;
-    int minor_rev;
-    char *adapter_name;
-    enum {
-	ID_KADUK = 24729;
-    } mech_id;
-    char integ_avail;
-    char conf_avail;
-    char unused;
-    char export_sec_context;
-    uint_32_t unused1;
-    sapgss_OID_desc *nt_canonical_name;
-    sapgss_OID_desc *pad[4];
-    char *mech_prefix_string;
-    char mutual_auth;
-    char replay_prot;
-    char reserved[2];
-    sapgss_OID_desc *mech_oid;
-};
-
 /* Copies of GSS structures to get the native-aligned ABI */
 #if 0 /* This should be ABI-compatible with 16-bit and native alignment */
 typedef struct sapgss_buffer_desc_struct {
@@ -100,6 +78,28 @@ typedef struct sapgss_ctx_id_struct *sapgss_ctx_id_t;
 typedef int sapgss_cred_usage_t;
 typedef uint32_t sapgss_qop_t;
 #endif
+
+/* SNC Adaptor description, as described in upstream's header. */
+struct sapgss_info_s {
+    int major_rev;
+    int minor_rev;
+    char *adapter_name;
+    enum {
+	ID_KADUK = 24729
+    } mech_id;
+    char integ_avail;
+    char conf_avail;
+    char unused;
+    char export_sec_context;
+    uint32_t unused1;
+    sapgss_OID_desc *nt_canonical_name;
+    sapgss_OID_desc *pad[4];
+    char *mech_prefix_string;
+    char mutual_auth;
+    char replay_prot;
+    char reserved[2];
+    sapgss_OID_desc *mech_oid;
+};
 
 /* Exported library routines */
 uint32_t sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n);

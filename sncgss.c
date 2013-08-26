@@ -77,20 +77,24 @@ sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
 
 uint32_t
 sapsnc_export_cname_blob(
-    uint32_t *,
-    gss_name_t,
-    gss_buffer_t,
-    int)
+    uint32_t *minor_status,
+    gss_name_t name,
+    gss_buffer_t out,
+    int dummy)
 {
+    *minor_status = 0;
+    return GSS_S_FAILURE;
 }
 
 uint32_t
 sapsnc_import_cname_blob(
-    uint32_t *,
-    gss_buffer_t
-    gss_name_t
-    int)
+    uint32_t *minor_status,
+    gss_buffer_t in,
+    gss_name_t name,
+    int dummy)
 {
+    *minor_status = 0;
+    return GSS_S_FAILURE;
 }
 
 uint32_t

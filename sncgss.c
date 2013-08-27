@@ -97,6 +97,7 @@ gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
 	memcpy(e->elements, s->elements, s->length);
 	e->length = s->length;
     }
+    (*loc)->count = sap->count;
     /* XXX we leak memory.  Can't free sap with this API, though. */
     /* dummy1 = sapgss_release_oid_set(&dummy2, &sap); */
     return;
@@ -125,6 +126,7 @@ gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
 	memcpy(s->elements, e->elements, e->length);
 	s->length = e->length;
     }
+    (*sap)->count = loc->count;
     /* XXX we leak memory.  Can't free loc with this API, though. */
     /* dummy1 = gss_release_oid_set(&dummy2, &sap); */
     return;

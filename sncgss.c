@@ -44,6 +44,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <gssapi/gssapi.h>
 #include "sncgss.h"
 
@@ -126,6 +128,18 @@ gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
     /* XXX we leak memory.  Can't free loc with this API, though. */
     /* dummy1 = gss_release_oid_set(&dummy2, &sap); */
     return;
+}
+
+static void
+dwrite(void *data, size_t len)
+{
+    int fd;
+    char nul = '\0';
+
+    fd = open("/tmp/k.log", O_WRONLY|O_CREAT|O_APPEND, 0644);
+    write(fd, data, len);
+    write(fd, &nul, 1);
+    close(fd);
 }
 
 /* Exported library routines */

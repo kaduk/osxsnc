@@ -107,6 +107,13 @@ gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
     gss_OID e;
     size_t i;
 
+    if (sap == NULL)
+	return;
+    if (loc == NULL) {
+	*sap = NULL;
+	return;
+    }
+
     *sap = calloc(1, sizeof(**sap));
     (*sap)->elements = calloc(loc->count, sizeof(sapgss_OID_desc));
     for(i = 0; i < loc->count; ++i) {

@@ -423,7 +423,7 @@ sapgss_release_name(
 }
 
 uint32_t
-sapgss_relesae_buffer(
+sapgss_release_buffer(
     uint32_t *minor_status,
     gss_buffer_t buffer)
 {

@@ -597,6 +597,7 @@ sapgss_wrap_size_limit(
     uint32_t req_output_size,
     uint32_t *max_input_size)
 {
+    *minor_status = 0;
     return gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 			       qop_req, req_output_size, max_input_size);
 }

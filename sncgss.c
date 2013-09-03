@@ -584,6 +584,7 @@ sapgss_inquire_context(
 				       targ_name, lifetime_rec, &mech_type_loc,
 				       ctx_flags, locally_initiated, open);
     gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    *mech_type = &gss_mech_krb5;
     return major_status;
 }
 

@@ -224,7 +224,7 @@ sapgss_acquire_cred(
 {
     gss_OID_set desired_mechs_loc;
     gss_OID_set actual_mechs_loc;
-    uint32_t major_status;
+    uint32_t major_status, dummy;
     
     memset(&desired_mechs_loc, 0, sizeof(desired_mechs_loc));
     memset(&actual_mechs_loc, 0, sizeof(actual_mechs_loc));
@@ -236,7 +236,7 @@ sapgss_acquire_cred(
     /* Must inquire_cred to force resolution for the krb5 mech */
     if (major_status != 0)
 	return major_status;
-    major_status = gss_inquire_cred(minor_status, *output_cred_handle,
+    (void)gss_inquire_cred(&dummy, *output_cred_handle,
 				    NULL, NULL, NULL, &actual_mechs_loc);
     gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
     return major_status;

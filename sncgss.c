@@ -55,6 +55,8 @@ sapgss_OID_desc krb5_nt_principal_name =
 /* The real one */
 sapgss_OID_desc gss_mech_krb5 =
     {9, "\052\206\110\206\367\022\001\002\002"};
+gss_OID_desc native_gss_mech_krb5 =
+    {9, "\052\206\110\206\367\022\001\002\002"};
 
 /* Local helper routines */
 static void
@@ -230,6 +232,11 @@ sapgss_acquire_cred(
 				    desired_mechs_loc, cred_usage,
 				    output_cred_handle, &actual_mechs_loc,
 				    time_rec);
+    /* Must inquire_cred to force resolution for the krb5 mech */
+    if (major_status != 0)
+	return major_status;
+    major_status = gss_inquire_cred(minor_status, *output_cred_handle,
+				    NULL, NULL, NULL, &actual_mechs_loc);
     gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
     return major_status;
 }

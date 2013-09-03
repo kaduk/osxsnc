@@ -93,7 +93,8 @@ struct sapgss_info_s {
     char export_sec_context;
     uint32_t unused1;
     sapgss_OID_desc *nt_canonical_name;
-    sapgss_OID_desc *pad[4];
+    sapgss_OID_desc *nt_private_name1;
+    sapgss_OID_desc *pad[3];
     char *mech_prefix_string;
     char mutual_auth;
     char replay_prot;

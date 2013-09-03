@@ -181,6 +181,7 @@ sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
     info->conf_avail = 1;
     info->export_sec_context = 1;
     info->nt_canonical_name = &krb5_nt_principal_name;
+    info->nt_private_name1 = &krb5_nt_principal_name;
     info->mech_prefix_string = "krb5";
     info->mutual_auth = 1;
     info->replay_prot = 1;

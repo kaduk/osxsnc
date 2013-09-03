@@ -458,10 +458,13 @@ sapgss_import_name(
     gss_name_t *output_name)
 {
     gss_OID input_name_type_loc;
+    uint32_t major_status;
 
     gss_OID_sap_to_loc(input_name_type, &input_name_type_loc);
-    return gss_import_name(minor_status, input_name_buffer,
-			   input_name_type_loc, output_name);
+    major_status =  gss_import_name(minor_status, input_name_buffer,
+				    input_name_type_loc, output_name);
+    return major_status == GSS_S_NAME_NOT_MN ? GSS_S_BAD_NAMETYPE :
+					       major_status;
 }
 
 uint32_t

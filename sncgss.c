@@ -60,6 +60,12 @@ sapgss_OID_desc gss_mech_krb5 =
 static void
 gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 {
+    if (loc == NULL)
+	return;
+    if (sap == NULL) {
+	*loc = NULL;
+	return;
+    }
     /* XXX We should be using interned strings; single OIDs returned
      * by the local library are generally not freed.  This version leaks
      * memory. */
@@ -73,6 +79,12 @@ gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 static void
 gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
 {
+    if (sap == NULL)
+	return;
+    if (loc == NULL) {
+	*sap = NULL;
+	return;
+    }
     /* XXX memory leaks here, too. */
     *sap = calloc(1, sizeof(**sap));
     (*sap)->elements = malloc(loc->length);
@@ -87,6 +99,13 @@ gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
     sapgss_OID s;
     gss_OID e;
     size_t i;
+
+    if (loc == NULL)
+	return;
+    if (sap == NULL) {
+	*loc = NULL;
+	return;
+    }
 
     *loc = calloc(1, sizeof(**loc));
     (*loc)->elements = calloc(sap->count, sizeof(gss_OID_desc));

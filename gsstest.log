@@ -1,0 +1,2162 @@
+
+  **************************************************************************
+  ***                                                                    ***
+  ***  "gsstest" -- GSS-API v2  Shared Library API Test Program          ***
+  ***                                                                    ***
+  ***  Version 1.30   11-Feb-2013                                        ***
+  ***                                                                    ***
+  ***  This implementation is Copyright (c), 1998  SAP AG Walldorf       ***
+  ***                                                                    ***
+  **************************************************************************
+  ***      This tool may be freely used to test functionality and        ***
+  ***      robustness of GSS-API v2 mechanism implemenations             ***
+  **************************************************************************
+  *** THIS SOFTWARE IS PROVIDED BY SAP AG ``AS IS'' AND ANY EXPRESSED    ***
+  *** OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE          ***
+  *** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR ***
+  *** PURPOSE ARE DISCLAIMED. SAP AG SHALL BE LIABLE FOR ANY DAMAGES     ***
+  *** ARISING OUT OF THE USE OF THIS SOFTWARE ONLY IF CAUSED BY SAP AG'S ***
+  *** INTENT OR GROSS NEGLIGENCE. IN CASE SAP AG IS LIABLE UNDER THIS    ***
+  *** AGREEMENT FOR DAMAGES CAUSED BY SAP AG'S GROSS NEGLIGENCE SAP AG   ***
+  *** FURTHER SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, ***
+  *** EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,***
+  *** PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,    ***
+  *** OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY    ***
+  *** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,        ***
+  *** OR TORT, AND SHALL NOT BE LIABLE IN EXCESS OF THE AMOUNT OF        ***
+  *** DAMAGES TYPICALLY FORESEEABLE FOR SAP AG, WHICH SHALL IN NO EVENT  ***
+  *** EXCEED US$ 500.000.-                                               ***
+  **************************************************************************
+
+Timer resolution of gettimeofday() is (at least)      0.001 millisec
+1 second passed in   1000.000 millisec. 
+
+=====================================================================
+  Current Date&Time :  Wed, 04-Sep-2013   02:00:53   GMT +00:00
+  Operating System  :  Darwin
+          -Release  :  12.4.0
+  Hardware/Machine  :  Darwin
+  GSSTEST built for :  Darwin on x86_64/x64 64-bit
+  scalar C-types    :  void* ptrdiff_t size_t time_t long int wchar_t char
+    (sizes in bits) :    64     64s      64u    64s   64s 32s   32s    8u
+  Endianess, Charset:  1234 (LITTLE_ENDIAN),  ASCII charset
+  Perf-Index (p-90) :  dbg= 44.50   (opt= 23.20)
+  Timer Resolution  :  0.001 millisec using "gettimeofday()"
+  Hostname          :  glossolalia.local
+  Current user      :  kaduk
+=====================================================================
+
+Loading GSS-API shared library #1 "../tmp/sncgss.dyld" ...
+      ... was loaded as an SAP SNC-Adapter.
+
+  mech_list from gss_indicate_mechs() #1 contains 7 gss_OID elements:
+  {
+    [ 0] = {1 2 840 113554 1 2 2}         MECH= Kerberos 5 (v2 - rfc1964)
+    [ 1] = {1 3 6 1 5 5 2}                MECH= SPNEGO (rfc2478)
+    [ 2] = {1 2 752 43 14 2}              
+    [ 3] = {1 3 6 1 5 5 14}               
+    [ 4] = {1 3 6 1 4 1 311 2 2 10}       
+    [ 5] = {1 3 5 1 5 2 7}                
+    [ 6] = {1 3 6 1 5 2 5}                
+  }
+  Selecting mechanism (0) from GSS shared library #1:
+      {1 2 840 113554 1 2 2}              MECH= Kerberos 5 (v2 - rfc1964)
+
+====================
+
+Checking supported nametypes via gss_inquire_names_for_mech()
+  name_types contains 7 gss_OID elements:
+  {
+    [ 0] = {1 2 840 113554 1 2 1 4}         NT= GSS_C_NT_HOSTBASED_SERVICE
+    [ 1] = {1 3 6 1 5 6 2}                  NT= (GSS_C_NT_HOSTBASED_SERVICE_X)
+    [ 2] = {1 2 840 113554 1 2 2 2}         NT= Huh? This is not in rfc1964!
+    [ 3] = {1 2 840 113554 1 2 1 1}         NT= GSS_C_NT_USER_NAME
+    [ 4] = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+    [ 5] = {1 2 752 43 13 23}             
+    [ 6] = {1 3 6 1 5 6 4}                  NT= GSS_C_NT_EXPORTED_NAME
+  }
+
+====================
+Testing generic gssapi functions ...
+----------
+TEST: passing mech_list from indicate_mechs() to release_oid_set()
+RESULT  OK
+TEST: passing name_types from inquire_names_for_mech() to release_oid_set()
+RESULT  OK
+====================
+Testing credentials management functions ...
+----------
+TEST: *default* initiating credentials (acquire_cred default mechs)
+RESULT  OK
+  actual_mechs from gss_acquire_cred() contains 1 gss_OID element:
+  {
+    [ 0] = {1 2 840 113554 1 2 2}         MECH= Kerberos 5 (v2 - rfc1964)
+  }
+----------
+TEST: *default* initiating credentials (acquire_cred specific mechs)
+RESULT  OK
+TEST: *default* initiating credentials (inquire_cred only)
+RESULT  OK
+TEST: named default initiating credentials (acquire_cred with name)
+RESULT  OK
+TEST: acquire_cred and inquire_cred with NO optional parameters
+RESULT  OK
+  My own name/identity (from default creds) resolves to
+    "zonetest@ATHENA.MIT.EDU"
+  Nametype oid = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+
+TEST: Examining the exported name framing
+  Framing details for exported name (Section 3.2, GSS-API v2 spec):
+    TOK_ID            :   00000: 04 01
+    MECH_OID_LEN = 11 :   00002: 00 0b
+        OID tag       :   00004: 06
+        OID len =   9 :   00005: 09
+        OID elements  :   00006: 2a 86 48 86 f7 12 01 02  02
+          = {1 2 840 113554 1 2 2}         MECH= Kerberos 5 (v2 - rfc1964)
+    NAME_LEN   =   23 :   0000f: 00 00 00 17
+    NAME              :   00013: 7a 6f 6e 65 74 65 73 74   zonetest
+                          0001b: 40 41 54 48 45 4e 41 2e   @ATHENA.
+                          00023: 4d 49 54 2e 45 44 55      MIT.EDU
+RESULT  OK
+
+
+TEST: acquiring *default* initiating credentials (simple)
+RESULT  OK
+TEST: acquiring *default* initiating credentials (query)
+RESULT  OK
+TEST: acquiring initiating credentials (gss_name_t)
+RESULT  OK
+TEST: acquiring initiating credentials (printable name)
+RESULT  OK
+TEST: acquiring initiating credentials (can. printable name)
+RESULT  OK
+TEST: acquiring accepting credentials for target (printable name)
+  for identity "sap/kaduk-too.mit.edu@ZONE.MIT.EDU"
+  canonical identity "host/glossolalia.local@LOCAL"
+RESULT  OK
+TEST: acquiring accepting credentials for target (can. printable name)
+RESULT  OK
+TEST: acquiring *default* accepting credentials (simple)
+RESULT  OK
+TEST: acquiring *default* accepting credentials (query)
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+  *default* accepting credentials not available.
+RESULT  OK
+====================
+Testing names management functions ...
+----------
+TEST: Testing consistency of gss_name_t conversions
+RESULT  OK
+TEST: Testing consistency of gss_name_t conversions
+RESULT  OK
+TEST: Testing support of hostbased service name "ftp@glossolalia.local"
+  Hostbased service name is recognized and transformed to
+    this name = "ftp/glossolalia.local@LOCAL"
+  With alternative nametype OID hostbased service name is transformed to
+    this name = "ftp/glossolalia.local@LOCAL"
+RESULT  OK
+====================
+Context establishment functions ...
+----------
+TEST: Testing sec_context est.: ini_cred=SIMPLE, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing sec_context est.: ini_cred=CHECKED, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing sec_context est.: ini_cred=GSSNAMED, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing sec_context est.: ini_cred=PRNAMED, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing sec_context est.: ini_cred=PRNAMED_VIA_XP, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing sec_context est.: ini_cred=SIMPLE, acc_cred=PRNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+TEST: Testing 10 sec_context est.: ini_cred=CHECKED, acc_cred=GSSNAMED
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+ERROR: sap_try_context(): context establishment error after #0 contexts!
+RESULT  OK
+====================
+Message Protection functions ...
+----------
+TEST: Testing Zero-length messages
+RESULT  OK
+TEST: gss_wrap_size_limit()/gss_wrap()/gss_getmic() token size (increase)
+  gss_wrap_size_limit() growth predictions:
+  wrap(conf)= [ 60 .. 60]   wrap(integ)= [ 28 .. 28 ]   bytes
+  Measuring true Mic token size & Wrap size increase -- PATIENCE
+  (for messages sizes <= 64009 bytes)
+  wrap(conf)= [ 60 .. 60]   wrap(integ)=[ 28 .. 28 ]   getmic()=[ 28 .. 28 ]
+RESULT  OK
+TEST: Testing immediate context transfer
+  >->->->->->->->->->-> Greetings from Child Process >->->->->->->->->->->
+Status:  gss_unwrap() == (GSS_S_DUPLICATE_TOKEN)
+         gss_display_status(0x00000002,GSS_S_GSS_CODE) =
+           "duplicate per-message token detected"
+Status:  gss_unwrap() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+  <-<-<-<-<-<-<-<-<-<-< Terminating Child process  <-<-<-<-<-<-<-<-<-<-<-<
+
+Status:  gss_verify_mic() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+RESULT  NOT ok (rc=1)
+-------
+====================
+Testing gss_display_status() major_status translations ...
+----------
+TEST: Testing gss_display_status() for routine errors:
+  GSS_S_COMPLETE                          =>
+  __________________________" Function completed successfully"
+  GSS_S_BAD_MECH                          =>
+  __________________________" An unsupported mechanism was requested"
+  GSS_S_BAD_NAME                          =>
+  __________________________" An invalid name was supplied"
+  GSS_S_BAD_NAMETYPE                      =>
+  __________________________" A supplied name was of an unsupported type"
+  GSS_S_BAD_BINDINGS                      =>
+  __________________________" Incorrect channel bindings were supplied"
+  GSS_S_BAD_STATUS                        =>
+  __________________________" An invalid status code was supplied"
+  GSS_S_BAD_MIC                           =>
+  __________________________" A token had an invalid MIC"
+  GSS_S_NO_CRED                           =>
+  ____" No credentials were supplied, or the credentials were unavailable or inaccessible."
+  GSS_S_NO_CONTEXT                        =>
+  __________________________" No context has been established"
+  GSS_S_DEFECTIVE_TOKEN                   =>
+  __________________________" A token was invalid"
+  GSS_S_DEFECTIVE_CREDENTIAL              =>
+  __________________________" A credential was invalid"
+  GSS_S_CREDENTIALS_EXPIRED               =>
+  __________________________" The referenced credentials have expired"
+  GSS_S_CONTEXT_EXPIRED                   =>
+  __________________________" The context has expired"
+  GSS_S_FAILURE                           =>
+  __________________________" Miscellaneous failure (see text)"
+  GSS_S_BAD_QOP                           =>
+  _________________" The quality-of-protection requested could not be provide"
+  GSS_S_UNAUTHORIZED                      =>
+  ______________________" The operation is forbidden by local security policy"
+  GSS_S_UNAVAILABLE                       =>
+  __________________________" The operation or option is not available"
+  GSS_S_DUPLICATE_ELEMENT                 =>
+  __________________________" The requested credential element already exists"
+  GSS_S_NAME_NOT_MN                       =>
+  __________________________" The provided name was not a mechanism name."
+RESULT  OK
+TEST: Testing gss_display_status() for informational status:
+  GSS_S_CONTINUE_NEEDED                   =>
+  __________________________"continuation call to routine required"
+  GSS_S_DUPLICATE_TOKEN                   =>
+  __________________________"duplicate per-message token detected"
+  GSS_S_OLD_TOKEN                         =>
+  __________________________"reordered (early) per-message token detected"
+  GSS_S_UNSEQ_TOKEN                       =>
+  __________________________"unknown routine error"
+  GSS_S_GAP_TOKEN                         =>
+  __________________________"unknown routine error"
+RESULT  OK
+TEST: Testing gss_display_status() for calling errors:
+  GSS_S_CALL_INACCESSIBLE_READ            =>
+  ____"A required input parameter could not be read. Function completed successfully"
+  GSS_S_CALL_INACCESSIBLE_WRITE           =>
+  ____"A required output parameter could not be written. Function completed successfully"
+  GSS_S_CALL_BAD_STRUCTURE                =>
+  _________________"A parameter was malformed Function completed successfully"
+RESULT  OK
+TEST: Testing gss_display_status() for status value combinations:
+  (GSS_S_FAILURE|GSS_S_DUPLICATE_TOKEN)   =>
+  __________________________"duplicate per-message token detected"
+  (GSS_S_FAILURE|GSS_S_OLD_TOKEN)         =>
+  __________________________"reordered (early) per-message token detected"
+  (GSS_S_FAILURE|GSS_S_UNSEQ_TOKEN)       =>
+  __________________________"unknown routine error"
+  (GSS_S_FAILURE|GSS_S_GAP_TOKEN)         =>
+  __________________________"unknown routine error"
+  (GSS_S_CALL_INACCESSIBLE_READ|GSS_S_BAD_NAME) =>
+  ____"A required input parameter could not be read. An invalid name was supplied"
+  (GSS_S_CALL_INACCESSIBLE_WRITE|GSS_S_DEFECTIVE_CREDENTIAL) =>
+  ____"A required output parameter could not be written. A credential was invalid"
+  (GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_BINDINGS) =>
+  ________"A parameter was malformed Incorrect channel bindings were supplied"
+RESULT  OK
+TEST: Testing gss_display_status() for mean/invalid value combinations:
+  (GSS_S_CALL_INACCESSIBLE_READ|GSS_S_DEFECTIVE_TOKEN|GSS_S_DUPLICATE_TOKEN) =>
+  __________________________"duplicate per-message token detected"
+  (GSS_S_CALL_INACCESSIBLE_READ|GSS_S_DEFECTIVE_TOKEN|GSS_S_DUPLICATE_TOKEN|GSS_S_CONTINUE_NEEDED) =>
+  __________________________"timed-out per-message token detected"
+  (GSS_S_CONTINUE_NEEDED|GSS_S_DUPLICATE_TOKEN|GSS_S_UNSEQ_TOKEN) =>
+  __________________________"unknown routine error"
+  (0xfffffffful)                          =>
+  __________________________"unknown routine error"
+  (0x04130020ul)                          =>
+  __________________________"unknown routine error"
+  (0x10200800ul)                          =>
+  __________________________"unknown routine error"
+RESULT  OK
+====================
+Testing error handling of name management functions ...
+----------
+TEST: Feeding gss_import_name() with a mech_oid nametype
+Status:  gss_import_name() == (GSS_S_BAD_NAMETYPE)
+         gss_display_status(0x00030000,GSS_S_GSS_CODE) =
+           " A supplied name was of an unsupported type"
+RESULT  OK
+TEST: Trying gss_import_name() with "XXXXXXXX"
+    parses to = "XXXXXXXX@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CBA/ZYX"
+    parses to = "CBA/ZYX@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CBA\ZYX"
+    parses to = "CBAZYX@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CBA@ZYX"
+    parses to = "CBA@ZYX"
+RESULT  OK
+TEST: Trying gss_import_name() with "CBA@"
+    parses to = "CBA@"
+RESULT  OK
+TEST: Trying gss_import_name() with "XY	Z"
+    parses to = "XYtZ@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "AB C"
+    parses to = "AB C@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "A B C	D"
+    parses to = "A B CtD@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "A@B@C@X"
+ERROR: gss_import_name() unexpected non-zero minor_status (96c73a86)!
+Status:  gss_canonicalize_name() == (GSS_S_BAD_NAME)
+         gss_display_status(0x00020000,GSS_S_GSS_CODE) =
+           " An invalid name was supplied"
+         gss_display_status(0x96c73a86,GSS_S_MECH_CODE) =
+           "part after realm in principal name"
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_import_name() with "A@@@@@@Z"
+ERROR: gss_import_name() unexpected non-zero minor_status (96c73a86)!
+Status:  gss_canonicalize_name() == (GSS_S_BAD_NAME)
+         gss_display_status(0x00020000,GSS_S_GSS_CODE) =
+           " An invalid name was supplied"
+         gss_display_status(0x96c73a86,GSS_S_MECH_CODE) =
+           "part after realm in principal name"
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_import_name() with "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    parses to = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "a,b,c,d"
+    parses to = "a,b,c,d@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "A/B/C/D"
+    parses to = "A/B/C/D@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "D\C\B\A"
+    parses to = "DCBA@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A1a,OU=Bb  ,O  = Cc,     C   =ES"
+    parses to = "CN=A1a,OU=Bb  ,O  = Cc,     C   =ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A2a, OU=Cb, O=Dc, C=ES"
+    parses to = "CN=A2a, OU=Cb, O=Dc, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "cn=A3a, ou=Cb, o=Dc, c=ES"
+    parses to = "cn=A3a, ou=Cb, o=Dc, c=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A4a; OU=Yb; O=Xc; C=ES"
+    parses to = "CN=A4a; OU=Yb; O=Xc; C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "cn=A5a; ou=Cb; o=Dc; c=ES"
+    parses to = "cn=A5a; ou=Cb; o=Dc; c=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A6a, OU=Cb, O=Dc"
+    parses to = "CN=A6a, OU=Cb, O=Dc@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "cn=A7a, ou=cb, o=Dc"
+    parses to = "cn=A7a, ou=cb, o=Dc@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "C=ES, O=Cc,   OU = Bb,CN=A8a"
+    parses to = "C=ES, O=Cc,   OU = Bb,CN=A8a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "OU=H, C=ES, CN=A9a, O=J"
+    parses to = "OU=H, C=ES, CN=A9a, O=J@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A10a, OU=C, O=D, CN=Bb, C=ES"
+    parses to = "CN=A10a, OU=C, O=D, CN=Bb, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A11a, OU=C, O=D, OU=F, CN=Bb, OU=G, C=ES"
+    parses to = "CN=A11a, OU=C, O=D, OU=F, CN=Bb, OU=G, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A12a, OU=C, O=D, C=ES,"
+    parses to = "CN=A12a, OU=C, O=D, C=ES,@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A13a; OU=Y; O=X; C=ES;"
+    parses to = "CN=A13a; OU=Y; O=X; C=ES;@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN = A14a , OU=T;O =U, C= ES"
+    parses to = "CN = A14a , OU=T;O =U, C= ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A15a,, OU=Z,O=Y,, ,C=ES"
+    parses to = "CN=A15a,, OU=Z,O=Y,, ,C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A16a;; OU=T;O=S;; ;C=ES"
+    parses to = "CN=A16a;; OU=T;O=S;; ;C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=, O=X17a,C=ES"
+    parses to = "CN=, O=X17a,C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A18a, O=Z, C="
+    parses to = "CN=A18a, O=Z, C=@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "FOO=A19a, O=Z, C=ES"
+    parses to = "FOO=A19a, O=Z, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "BAR=, O=Z20a, C=ES"
+    parses to = "BAR=, O=Z20a, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "FOO=BAR=O, O=Z21a, C=ES"
+    parses to = "FOO=BAR=O, O=Z21a, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A22c, O=Z, C=E"
+    parses to = "CN=A22c, O=Z, C=E@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A23c, O=Z, C=ES, C=US"
+    parses to = "CN=A23c, O=Z, C=ES, C=US@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "cn=A24a, o=z, c=es"
+    parses to = "cn=A24a, o=z, c=es@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A25a, O=ACME Puter, C=ES"
+    parses to = "CN=A25a, O=ACME Puter, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A26a, O="ACME Puter", C=ES"
+    parses to = "CN=A26a, O="ACME Puter", C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A27a, O="ACME Puter, Inc.", C=ES"
+    parses to = "CN=A27a, O="ACME Puter, Inc.", C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A28a, 0=ACME, C=ES"
+    parses to = "CN=A28a, 0=ACME, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "OID.2.5.4.3=A29a, C=ES"
+    parses to = "OID.2.5.4.3=A29a, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A30a, OID.1.2.840.113549.1.9.1=foo@bar.com, C=ES"
+    parses to = "CN=A30a, OID.1.2.840.113549.1.9.1=foo@bar.com, C=ES"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A31a, ST=CA, STREET=somestreet, C=US"
+    parses to = "CN=A31a, ST=CA, STREET=somestreet, C=US@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A32a, SP=SP, C=DE"
+    parses to = "CN=A32a, SP=SP, C=DE@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "2.5.4.3=A33a, O=Z, C=ES"
+    parses to = "2.5.4.3=A33a, O=Z, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A34a, 2.5.4.10=#1303416243, C=ES"
+    parses to = "CN=A34a, 2.5.4.10=#1303416243, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A35a, O=#04024566, C=ES"
+    parses to = "CN=A35a, O=#04024566, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A36a, O=#13024566, C=ES"
+    parses to = "CN=A36a, O=#13024566, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A37a, O=\58\59\5A, C=ES"
+    parses to = "CN=A37a, O=58595A, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A38a, O=A\<B\>C\,\;\"\'\+\ \\\#\=Hi\ , C=ES"
+    parses to = "CN=A38a, O=A<B>C,;"'+ \#=Hi , C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A39a, O=Hello-öäüÖÄÜß-umlauts, C=ES"
+    parses to = "CN=A39a, O=Hello-öäüÖÄÜß-umlauts, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A40a, O=Foo{Bar}, OU=[Uh]-(oh), C=ES"
+    parses to = "CN=A40a, O=Foo{Bar}, OU=[Uh]-(oh), C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A41a, 2.5.4.14=FOObar, C=ES"
+    parses to = "CN=A41a, 2.5.4.14=FOObar, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "CN=A42a, O=Foo/baR, C=ES"
+    parses to = "CN=A42a, O=Foo/baR, C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/CN=B01a/OU=Db/O=Ec/C=ES"
+    parses to = "/CN=B01a/OU=Db/O=Ec/C=ES@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/OU=Eb/CN=B02a"
+    parses to = "/C=ES/O=Fc/OU=Eb/CN=B02a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/OU=E/C=ES/CN=B03b/O=G"
+    parses to = "/OU=E/C=ES/CN=B03b/O=G@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a"
+    parses to = "/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a"
+    parses to = "/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc//OU=Eb/CN=B06a"
+    parses to = "/C=ES/O=Fc//OU=Eb/CN=B06a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/OU=/CN=B07a"
+    parses to = "/C=ES/O=Fc/OU=/CN=B07a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a"
+    parses to = "/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a"
+    parses to = "/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/O=Eb/OU=Fc/CN=B10a"
+    parses to = "/O=Eb/OU=Fc/CN=B10a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/CN=B11a/OU=Fc/O=Eb"
+    parses to = "/CN=B11a/OU=Fc/O=Eb@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Foo{[(Bar)]}/CN=B12a"
+    parses to = "/C=ES/O=Foo{[(Bar)]}/CN=B12a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=Foo\/Bar/CN=B13a"
+    parses to = "/C=ES/O=Foo/Bar/CN=B13a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/O=#13024566/CN=B14a"
+    parses to = "/C=ES/O=#13024566/CN=B14a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/C=ES/2.5.4.14=FOObar/CN=B15a"
+    parses to = "/C=ES/2.5.4.14=FOObar/CN=B15a@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "A:B%C/D\E+F-G@H"
+    parses to = "A:B%C/DE+F-G@H"
+RESULT  OK
+TEST: Trying gss_import_name() with "A@B:C%D/E\F+G-H"
+ERROR: gss_import_name() unexpected non-zero minor_status (96c73a86)!
+Status:  gss_canonicalize_name() == (GSS_S_BAD_NAME)
+         gss_display_status(0x00020000,GSS_S_GSS_CODE) =
+           " An invalid name was supplied"
+         gss_display_status(0x96c73a86,GSS_S_MECH_CODE) =
+           "part after realm in principal name"
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_import_name() with "@"
+    parses to = "@"
+RESULT  OK
+TEST: Trying gss_import_name() with ","
+    parses to = ",@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/"
+    parses to = "/@ATHENA.MIT.EDU"
+RESULT  OK
+TEST: Trying gss_import_name() with "/@"
+    parses to = "/@"
+RESULT  OK
+TEST: Trying gss_import_name() with "\"
+ERROR: gss_import_name() unexpected non-zero minor_status (96c73a86)!
+Status:  gss_canonicalize_name() == (GSS_S_BAD_NAME)
+         gss_display_status(0x00020000,GSS_S_GSS_CODE) =
+           " An invalid name was supplied"
+         gss_display_status(0x96c73a86,GSS_S_MECH_CODE) =
+           "trailing \ in principal name"
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_import_name() with ""
+ERROR: gss_display_name() returned empty buffer ?!
+ERROR: gss_display_name() returned empty buffer ?!
+HUH?!  Empty name accepted? This looks suspicious!
+    parses to = "@ATHENA.MIT.EDU"
+RESULT  NOT ok (rc=1)
+-------
+====================
+Testing error handling of credential management functions ...
+----------
+TEST: Feeding gss_acquire_cred(INITIATE) with a single nametype-OID mech_set
+Status:  gss_acquire_cred Ini() == (GSS_S_BAD_MECH)
+         gss_display_status(0x00010000,GSS_S_GSS_CODE) =
+           " An unsupported mechanism was requested"
+ERROR: gss_acquire_cred returned BOGUS credential handle cred_handle!
+RESULT  NOT ok (rc=1)
+-------
+TEST: Feeding gss_acquire_cred(ACCEPT) with a single nametype-OID mech_set
+Status:  gss_acquire_cred Acc() == (GSS_S_BAD_MECH)
+         gss_display_status(0x00010000,GSS_S_GSS_CODE) =
+           " An unsupported mechanism was requested"
+ERROR: gss_acquire_cred returned BOGUS credential handle cred_handle!
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_acquire_cred(INITIATE) for "XXXXXXXX"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CBA/ZYX"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CBA\ZYX"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CBA@ZYX"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CBA@"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "XY	Z"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "AB C"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "A B C	D"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "a,b,c,d"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "A/B/C/D"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "D\C\B\A"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A1a,OU=Bb  ,O  = Cc,     C   =ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A2a, OU=Cb, O=Dc, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "cn=A3a, ou=Cb, o=Dc, c=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A4a; OU=Yb; O=Xc; C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "cn=A5a; ou=Cb; o=Dc; c=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A6a, OU=Cb, O=Dc"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "cn=A7a, ou=cb, o=Dc"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "C=ES, O=Cc,   OU = Bb,CN=A8a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "OU=H, C=ES, CN=A9a, O=J"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A10a, OU=C, O=D, CN=Bb, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A11a, OU=C, O=D, OU=F, CN=Bb, OU=G, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A12a, OU=C, O=D, C=ES,"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A13a; OU=Y; O=X; C=ES;"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN = A14a , OU=T;O =U, C= ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A15a,, OU=Z,O=Y,, ,C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A16a;; OU=T;O=S;; ;C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=, O=X17a,C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A18a, O=Z, C="
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "FOO=A19a, O=Z, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "BAR=, O=Z20a, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "FOO=BAR=O, O=Z21a, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A22c, O=Z, C=E"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A23c, O=Z, C=ES, C=US"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "cn=A24a, o=z, c=es"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A25a, O=ACME Puter, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A26a, O="ACME Puter", C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A27a, O="ACME Puter, Inc.", C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A28a, 0=ACME, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "OID.2.5.4.3=A29a, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A30a, OID.1.2.840.113549.1.9.1=foo@bar.com, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A31a, ST=CA, STREET=somestreet, C=US"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A32a, SP=SP, C=DE"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "2.5.4.3=A33a, O=Z, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A34a, 2.5.4.10=#1303416243, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A35a, O=#04024566, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A36a, O=#13024566, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A37a, O=\58\59\5A, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A38a, O=A\<B\>C\,\;\"\'\+\ \\\#\=Hi\ , C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A39a, O=Hello-öäüÖÄÜß-umlauts, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A40a, O=Foo{Bar}, OU=[Uh]-(oh), C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A41a, 2.5.4.14=FOObar, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "CN=A42a, O=Foo/baR, C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/CN=B01a/OU=Db/O=Ec/C=ES"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/OU=Eb/CN=B02a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/OU=E/C=ES/CN=B03b/O=G"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc//OU=Eb/CN=B06a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/OU=/CN=B07a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/O=Eb/OU=Fc/CN=B10a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/CN=B11a/OU=Fc/O=Eb"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Foo{[(Bar)]}/CN=B12a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=Foo\/Bar/CN=B13a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/O=#13024566/CN=B14a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/C=ES/2.5.4.14=FOObar/CN=B15a"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "A:B%C/D\E+F-G@H"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "@"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for ","
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for "/@"
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(INITIATE) for ""
+ERROR: gss_display_name() returned empty buffer ?!
+Status:  gss_acquire_cred Ini() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  NOT ok (rc=1)
+-------
+TEST: Trying gss_acquire_cred(ACCEPT) for "XXXXXXXX"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CBA/ZYX"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CBA\ZYX"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CBA@ZYX"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CBA@"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "XY	Z"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "AB C"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "A B C	D"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "a,b,c,d"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "A/B/C/D"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "D\C\B\A"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A1a,OU=Bb  ,O  = Cc,     C   =ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A2a, OU=Cb, O=Dc, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "cn=A3a, ou=Cb, o=Dc, c=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A4a; OU=Yb; O=Xc; C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "cn=A5a; ou=Cb; o=Dc; c=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A6a, OU=Cb, O=Dc"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "cn=A7a, ou=cb, o=Dc"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "C=ES, O=Cc,   OU = Bb,CN=A8a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "OU=H, C=ES, CN=A9a, O=J"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A10a, OU=C, O=D, CN=Bb, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A11a, OU=C, O=D, OU=F, CN=Bb, OU=G, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A12a, OU=C, O=D, C=ES,"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A13a; OU=Y; O=X; C=ES;"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN = A14a , OU=T;O =U, C= ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A15a,, OU=Z,O=Y,, ,C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A16a;; OU=T;O=S;; ;C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=, O=X17a,C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A18a, O=Z, C="
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "FOO=A19a, O=Z, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "BAR=, O=Z20a, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "FOO=BAR=O, O=Z21a, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A22c, O=Z, C=E"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A23c, O=Z, C=ES, C=US"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "cn=A24a, o=z, c=es"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A25a, O=ACME Puter, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A26a, O="ACME Puter", C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A27a, O="ACME Puter, Inc.", C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A28a, 0=ACME, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "OID.2.5.4.3=A29a, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A30a, OID.1.2.840.113549.1.9.1=foo@bar.com, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A31a, ST=CA, STREET=somestreet, C=US"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A32a, SP=SP, C=DE"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "2.5.4.3=A33a, O=Z, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A34a, 2.5.4.10=#1303416243, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A35a, O=#04024566, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A36a, O=#13024566, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A37a, O=\58\59\5A, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A38a, O=A\<B\>C\,\;\"\'\+\ \\\#\=Hi\ , C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A39a, O=Hello-öäüÖÄÜß-umlauts, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A40a, O=Foo{Bar}, OU=[Uh]-(oh), C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A41a, 2.5.4.14=FOObar, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "CN=A42a, O=Foo/baR, C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/CN=B01a/OU=Db/O=Ec/C=ES"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/OU=Eb/CN=B02a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/OU=E/C=ES/CN=B03b/O=G"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc//OU=Eb/CN=B06a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/OU=/CN=B07a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/O=Eb/OU=Fc/CN=B10a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/CN=B11a/OU=Fc/O=Eb"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Foo{[(Bar)]}/CN=B12a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=Foo\/Bar/CN=B13a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/O=#13024566/CN=B14a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/C=ES/2.5.4.14=FOObar/CN=B15a"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "A:B%C/D\E+F-G@H"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "@"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for ","
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for "/@"
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  OK
+TEST: Trying gss_acquire_cred(ACCEPT) for ""
+ERROR: gss_display_name() returned empty buffer ?!
+Status:  gss_acquire_cred Acc() == (GSS_S_NO_CRED)
+         gss_display_status(0x00070000,GSS_S_GSS_CODE) =
+           " No credentials were supplied, or the credentials were unavailable or inaccessible."
+RESULT  NOT ok (rc=1)
+-------
+====================
+Testing error handling of context establishment functions ...
+----------
+TEST: Testing context establishment with target name "krbtgt/ATHENA.MIT.EDU@ATHENA.MIT.EDU"
+Status:  gss_init_sec_context #2() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/ATHENA.MIT.EDU@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "XXXXXXXX"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (XXXXXXXX@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CBA/ZYX"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CBA/ZYX@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CBA\ZYX"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CBAZYX@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CBA@ZYX"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/ZYX@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CBA@"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "XY	Z"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (XY\tZ@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "AB C"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (AB\ C@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "A B C	D"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (A\ B\ C\tD@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "a,b,c,d"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (a,b,c,d@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "A/B/C/D"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (A/B/C/D@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "D\C\B\A"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (DCBA@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A1a,OU=Bb  ,O  = Cc,     C   =ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A1a,OU=Bb\ \ ,O\ \ =\ Cc,\ \ \ \ \ C\ \ \ =ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A2a, OU=Cb, O=Dc, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A2a,\ OU=Cb,\ O=Dc,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "cn=A3a, ou=Cb, o=Dc, c=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (cn=A3a,\ ou=Cb,\ o=Dc,\ c=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A4a; OU=Yb; O=Xc; C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A4a;\ OU=Yb;\ O=Xc;\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "cn=A5a; ou=Cb; o=Dc; c=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (cn=A5a;\ ou=Cb;\ o=Dc;\ c=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A6a, OU=Cb, O=Dc"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A6a,\ OU=Cb,\ O=Dc@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "cn=A7a, ou=cb, o=Dc"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (cn=A7a,\ ou=cb,\ o=Dc@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "C=ES, O=Cc,   OU = Bb,CN=A8a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (C=ES,\ O=Cc,\ \ \ OU\ =\ Bb,CN=A8a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "OU=H, C=ES, CN=A9a, O=J"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (OU=H,\ C=ES,\ CN=A9a,\ O=J@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A10a, OU=C, O=D, CN=Bb, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A10a,\ OU=C,\ O=D,\ CN=Bb,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A11a, OU=C, O=D, OU=F, CN=Bb, OU=G, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A11a,\ OU=C,\ O=D,\ OU=F,\ CN=Bb,\ OU=G,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A12a, OU=C, O=D, C=ES,"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A12a,\ OU=C,\ O=D,\ C=ES,@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A13a; OU=Y; O=X; C=ES;"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A13a;\ OU=Y;\ O=X;\ C=ES;@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN = A14a , OU=T;O =U, C= ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN\ =\ A14a\ ,\ OU=T;O\ =U,\ C=\ ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A15a,, OU=Z,O=Y,, ,C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A15a,,\ OU=Z,O=Y,,\ ,C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A16a;; OU=T;O=S;; ;C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A16a;;\ OU=T;O=S;;\ ;C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=, O=X17a,C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=,\ O=X17a,C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A18a, O=Z, C="
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A18a,\ O=Z,\ C=@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "FOO=A19a, O=Z, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (FOO=A19a,\ O=Z,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "BAR=, O=Z20a, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (BAR=,\ O=Z20a,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "FOO=BAR=O, O=Z21a, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (FOO=BAR=O,\ O=Z21a,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A22c, O=Z, C=E"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A22c,\ O=Z,\ C=E@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A23c, O=Z, C=ES, C=US"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A23c,\ O=Z,\ C=ES,\ C=US@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "cn=A24a, o=z, c=es"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (cn=A24a,\ o=z,\ c=es@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A25a, O=ACME Puter, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A25a,\ O=ACME\ Puter,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A26a, O="ACME Puter", C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A26a,\ O="ACME\ Puter",\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A27a, O="ACME Puter, Inc.", C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A27a,\ O="ACME\ Puter,\ Inc.",\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A28a, 0=ACME, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A28a,\ 0=ACME,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "OID.2.5.4.3=A29a, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (OID.2.5.4.3=A29a,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A30a, OID.1.2.840.113549.1.9.1=foo@bar.com, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/bar.com,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A31a, ST=CA, STREET=somestreet, C=US"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A31a,\ ST=CA,\ STREET=somestreet,\ C=US@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A32a, SP=SP, C=DE"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A32a,\ SP=SP,\ C=DE@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "2.5.4.3=A33a, O=Z, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (2.5.4.3=A33a,\ O=Z,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A34a, 2.5.4.10=#1303416243, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A34a,\ 2.5.4.10=#1303416243,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A35a, O=#04024566, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A35a,\ O=#04024566,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A36a, O=#13024566, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A36a,\ O=#13024566,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A37a, O=\58\59\5A, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A37a,\ O=58595A,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A38a, O=A\<B\>C\,\;\"\'\+\ \\\#\=Hi\ , C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A38a,\ O=A<B>C,;"'+\ \\#=Hi\ ,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A39a, O=Hello-öäüÖÄÜß-umlauts, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A39a,\ O=Hello-öäüÖÄÜß-umlauts,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A40a, O=Foo{Bar}, OU=[Uh]-(oh), C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A40a,\ O=Foo{Bar},\ OU=[Uh]-(oh),\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A41a, 2.5.4.14=FOObar, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A41a,\ 2.5.4.14=FOObar,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "CN=A42a, O=Foo/baR, C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (CN=A42a,\ O=Foo/baR,\ C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/CN=B01a/OU=Db/O=Ec/C=ES"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/CN=B01a/OU=Db/O=Ec/C=ES@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/OU=Eb/CN=B02a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/OU=Eb/CN=B02a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/OU=E/C=ES/CN=B03b/O=G"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/OU=E/C=ES/CN=B03b/O=G@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/OU=Eb/OU=Ec/CN=B04a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/OU=Eb/CN=Ab/CN=B05a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc//OU=Eb/CN=B06a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc//OU=Eb/CN=B06a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/OU=/CN=B07a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/OU=/CN=B07a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/FOO=BAR/OU=Eb/CN=B08a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Fc/FOO=/OU=Eb/CN=B09a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/O=Eb/OU=Fc/CN=B10a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/O=Eb/OU=Fc/CN=B10a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/CN=B11a/OU=Fc/O=Eb"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/CN=B11a/OU=Fc/O=Eb@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Foo{[(Bar)]}/CN=B12a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Foo{[(Bar)]}/CN=B12a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=Foo\/Bar/CN=B13a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=Foo\/Bar/CN=B13a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/O=#13024566/CN=B14a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/O=#13024566/CN=B14a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/C=ES/2.5.4.14=FOObar/CN=B15a"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/C=ES/2.5.4.14=FOObar/CN=B15a@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "A:B%C/D\E+F-G@H"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/H@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "@"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target ","
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (,@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (/@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target "/@"
+Status:  gss_init_sec_context #1() == (GSS_S_FAILURE)
+         gss_display_status(0x000d0000,GSS_S_GSS_CODE) =
+           " Miscellaneous failure (see text)"
+         gss_display_status(0x96c73a8d,GSS_S_MECH_CODE) =
+           "Matching credential (krbtgt/@ATHENA.MIT.EDU) not found"
+RESULT  OK
+TEST: Trying context establishment with target ""
+Status:  gss_init_sec_context #1() == (GSS_S_BAD_NAME)
+         gss_display_status(0x00020000,GSS_S_GSS_CODE) =
+           " An invalid name was supplied"
+RESULT  OK
+====================
+
+Finally ...
+----------
+
+
+*********************************************************************
+*                                                                   *
+*   GSStest Result Summary :                                        *
+*                                                                   *
+*********************************************************************
+
+  GSSTEST Release   :  Version 1.30   11-Feb-2013  (64-bit)
+         built on   :  Sep  3 2013 at 15:13:05
+
+  Command line:
+    argv[ 0] = "./gsstest"
+    argv[ 1] = "-l"
+    argv[ 2] = "../tmp/sncgss.dyld"
+    argv[ 3] = "-a"
+    argv[ 4] = "sap/kaduk-too.mit.edu@ZONE.MIT.EDU"
+
+  SNC-Adapter       :  ../tmp/sncgss.dyld
+-------------------------------------------------------------
+  Name = "OS X krb5 compat shim"
+
+              supported SAP R/3 Releases : 3.1I, 4.0B, 4.5x, 4.6x
+                             Mech Prefix : "krb5"       (ok)
+                             SAPGSS_ID   : 24729
+  Support for      context import/export : Yes       (ok)
+  Support for      mutual authentication : Yes       (ok)
+  Support for     data replay protection : Yes       (ok)
+  Support for confidentiality protection : Yes       (ok)
+  Support for       integrity protection : Yes       (ok)
+
+  canonical = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+  Private nametype OIDs:
+     "p:" = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+-------------------------------------------------------------
+
+
+=====================================================================
+  Current Date&Time :  Tue, 03-Sep-2013   22:00:57   GMT -04:00
+  Operating System  :  Darwin
+          -Release  :  12.4.0
+  Hardware/Machine  :  Darwin
+  GSSTEST built for :  Darwin on x86_64/x64 64-bit
+  scalar C-types    :  void* ptrdiff_t size_t time_t long int wchar_t char
+    (sizes in bits) :    64     64s      64u    64s   64s 32s   32s    8u
+  Endianess, Charset:  1234 (LITTLE_ENDIAN),  ASCII charset
+  Perf-Index (p-90) :  dbg= 42.40   (opt= 22.10)
+  Timer Resolution  :  0.001 millisec using "gettimeofday()"
+  Hostname          :  glossolalia.local
+  Current user      :  kaduk
+=====================================================================
+
+(( 1 a ))
+  Mechanism = {1 2 840 113554 1 2 2}         MECH= Kerberos 5 (v2 - rfc1964)
+            = { 9, "\052\206\110\206\367\022\001\002\002" }
+
+(( 1 b ))
+  Nametype  = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+            = { 10, "\052\206\110\206\367\022\001\002\002\001" }
+
+(( 1 c ))
+  default    Initiator name: "zonetest@ATHENA.MIT.EDU"
+  given      Acceptor  name: "sap/kaduk-too.mit.edu@ZONE.MIT.EDU"
+  canonical  Acceptor  name: "host/glossolalia.local@LOCAL"
+
+  (default)  Acceptor  name: "host/glossolalia.local@LOCAL"
+
+----------
+
+(( 2 a ))
+Performance of names management calls             min      avg      max :
+  gss_import_name()            (  880 calls)     0.00     0.01     0.14  ms
+  gss_display_name()           ( 1058 calls)     0.00     0.00     0.01  ms
+  gss_export_name()            (  203 calls)     0.00     0.00     0.00  ms
+  gss_canonicalize_name()      (  820 calls)     0.00     0.00     0.39  ms
+  gss_compare_name()           (  207 calls)     0.00     0.00     0.00  ms
+  gss_release_name()           ( 1884 calls)     0.00     0.00     0.01  ms
+
+(( 2 b ))
+Observed sizes of names:
+  printable names                  [ 21 .. 34 ]  bytes
+  exported binary canonical names  [ 42 .. 53 ]  bytes
+
+Support of Hostbased Service Names:
+  gss_inquire_names_for_mech() includes GSS_C_NT_HOSTBASED_SERVICE,
+  and our sample hostbased service name is accepted.
+
+----------
+
+(( 3 a ))
+Performance of credential management calls        min      avg      max :
+  gss_acquire_cred() Ini       (   98 calls)     3.37     4.65   101.77  ms
+  gss_acquire_cred() Acc       (   90 calls)     0.43     0.55     2.01  ms
+  gss_inquire_cred() Ini       (    8 calls)     1.17     2.17     7.18  ms
+  gss_inquire_cred() Acc       (    3 calls)     0.37     0.40     0.43  ms
+  gss_release_cred()           (  188 calls)     0.00     0.00     0.31  ms
+
+(( 3 b ))
+Observed Credentials lifetime(s):
+                                Elapsed real time : 00h 00m 01s
+
+  Initiator credentials         lifetime decrease : 00h 00m 03s
+  Initiator credentials initial lifetime          : 09h 58m 58s
+  Initiator credentials final   lifetime          : 09h 58m 55s
+
+  Acceptor  credentials lifetime constant at      : Indefinite
+
+----------
+Security context establishment  (10 contexts)
+
+
+(( 4 a ))
+Mechanism uses 2-way authentication
+
+(( 4 b ))
+Security Context Attribute results:
+     requested  = (MUTUAL,REPLAY,CONF,INTEG,TRANS)
+     provided   = (MUTUAL,REPLAY,CONF,INTEG,TRANS)
+
+Performance of context establishment calls        min      avg      max :
+  gss_init_sec_context()   #1  (   11 calls)     3.44   197.08  2132.49  ms
+  gss_init_sec_context()   #2  (   10 calls)     0.03     0.03     0.05  ms
+  gss_accept_sec_context() #1  (   11 calls)     0.09     0.21     0.35  ms
+
+(( 4 c ))
+Total context establishment overhead              min      avg      max :
+  gss_init_sec_context()       (   10 calls)     3.47   197.11  2132.53  ms
+  gss_accept_sec_context()     (   10 calls)     0.09     0.21     0.35  ms
+  gss_delete_sec_context()     (   22 calls)     0.00     0.01     0.02  ms
+  gss_inquire_context()        (   82 calls)     0.00     0.00     0.01  ms
+
+
+(( 4 d ))
+Observed initial lifetimes for established security contexts:
+
+                             Elapsed real time : 00h 00m 01s
+
+  Initiator context         lifetimes decrease : 00h 00m 01s
+  Initiator context initial lifetime           : 09h 58m 56s
+  Initiator context final   lifetime           : 09h 58m 55s
+
+  Acceptor  context         lifetimes decrease : 00h 00m 01s
+  Acceptor  context initial lifetime           : 09h 58m 56s
+  Acceptor  context final   lifetime           : 09h 58m 55s
+
+(( 4 e ))
+Observed token sizes for    gss_init_sec_context():  [ 576 .. 593 ]  bytes
+Observed token sizes for  gss_accept_sec_context():  [ 124 .. 156 ]  bytes
+
+
+----------
+Security context transfer: 32 context transfers, 1 cross-process
+
+(( 5 a ))
+Performance of security context transfer          min      avg      max :
+  gss_export_sec_context() Ini (   17 calls)     0.01     0.01     0.02  ms
+  gss_export_sec_context() Acc (   24 calls)     0.01     0.01     0.02  ms
+  gss_import_sec_context() Ini (   17 calls)     0.01     0.01     0.01  ms
+  gss_import_sec_context() Acc (   24 calls)     0.01     0.01     0.02  ms
+
+
+(( 5 b ))
+Interprocess token sizes for Initiator:  [ 368 .. 368 ]  bytes  (  17 calls)
+Interprocess token sizes for  Acceptor:  [ 368 .. 368 ]  bytes  (  24 calls)
+
+
+
+----------
+Message Protection Services: 
+(( 6 a ))
+Confidentiality and Integrity
+
+(( 6 b ))
+Performance of per-message calls                  min      avg      max :
+  gss_context_time()           (  266 calls)     0.00     0.00     0.00  ms
+  gss_wrap_size_limit()        ( 7798 calls)     0.00     0.00     0.01  ms
+
+(( 6 c ))
+Message protection throughput         avg     max :
+  gss_getmic()        (  781 calls) 273.5   647.6  KByte/msec  min= 0.00 ms
+  gss_verifymic()     (  770 calls) 289.3   647.6  KByte/msec  min= 0.00 ms
+  gss_wrap(mic)       (  771 calls) 248.7   593.7  KByte/msec  min= 0.00 ms
+  gss_unwrap(mic)     (  756 calls) 285.4   647.5  KByte/msec  min= 0.00 ms
+  gss_wrap(conf)      (  790 calls)  44.8   169.6  KByte/msec  min= 0.02 ms
+  gss_unwrap(conf)    (  778 calls) 196.1   474.9  KByte/msec  min= 0.00 ms
+
+
+(( 6 d ))
+Token sizes for           gss_getmic()  :  [ 28 .. 28 ]  bytes
+Message size increase for gss_wrap(mic) :  [ 28 .. 28 ]  bytes
+Message size increase for gss_wrap(conf):  [ 60 .. 60 ]  bytes
+
+----------
+
+(( 7 a ))
+Performance of remaining GSS-API calls            min      avg      max :
+  gss_display_status()         (  368 calls)     0.00     0.00     0.01  ms
+  gss_release_buffer()         ( 8047 calls)     0.00     0.00     0.00  ms
+  gss_release_oid_set()        (    9 calls)     0.00     0.00     0.00  ms
+  gss_indicate_mechs()         (    2 calls)     0.00     0.18     0.36  ms
+
+----------
+Displaying of status information via gss_display_status():
+
+(( 7 b ))
+  gss_display_status(major) output message size [ 20 .. 83 ] avg= 41 chars
+
+-------------------------------------------------------------
+  Current limits for SNC-interoperability
+    with R/3 Releases 3.1x, 4.0x, 4.5x:
+
+  max. length of printable names           =     90   octets
+  max. length of exported (binary) names   =    126   octets
+  max. size of MIC token by gss_getmic()   =    128   octets
+  max. message size increase by gss_wrap() =    128   octets
+  max. size of context establishment token =  25000   octets
+  max. size of exported context token      =   8000   octets
+  max. context establishment time          =   1000.0 millisec
+  max. CPU time import/export_sec_context  =      3.0 millisec  ( 0.1)
+  max. CPU time for gss_context_time()     =      1.0 millisec  ( 0.0)
+  max. getmic()/verifymic() latency        =      9.0 millisec  ( 0.4)
+  max. wrap(mic)/unwrap(mic) latency       =      9.5 millisec  ( 0.4)
+  max. wrap(conf)/unwrap(conf) latency     =     10.0 millisec  ( 0.5)
+-------------------------------------------------------------
+
+
+==================
+
+FAILING some API result tests with accumulated RC value:  10
+Passing all SAP constraints.
+
+!!! FAILED !!!   SAP GSS-API v2 Test
+
+==================
+Done.
+

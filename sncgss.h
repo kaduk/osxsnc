@@ -85,7 +85,7 @@ struct sapgss_info_s {
     int minor_rev;
     char *adapter_name;
     enum {
-	ID_KADUK = 24729
+	ID_KRB5 = 2
     } mech_id;
     char integ_avail;
     char conf_avail;

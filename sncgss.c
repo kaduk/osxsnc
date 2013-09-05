@@ -176,7 +176,7 @@ sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
     info->major_rev = 1;
     info->minor_rev = 0;
     info->adapter_name = "OS X krb5 compat shim";
-    info->mech_id = ID_KADUK;
+    info->mech_id = ID_KRB5;
     info->integ_avail = 1;
     info->conf_avail = 1;
     info->export_sec_context = 1;

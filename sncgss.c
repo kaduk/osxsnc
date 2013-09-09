@@ -151,12 +151,21 @@ gss_OID_set_loc_release(gss_OID_set *loc)
     set = NULL;
 }
 
+/*
+ * Translate an OID_set from the local GSS-API library's ABI into the
+ * ABI which SAP expects.  This translation routine is only used within
+ * this shim adapter, so it is appropriate for the this routine to release
+ * the storage which was allocated by the GSS-API library (since that
+ * storage will never be exposed to the application and will otherwise be
+ * leaked).
+ */
 static void
 gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
 {
     sapgss_OID s;
     gss_OID e;
     size_t i;
+    uint32_t dummy;
 
     if (sap == NULL)
 	return;
@@ -175,8 +184,7 @@ gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
 	s->length = e->length;
     }
     (*sap)->count = loc->count;
-    /* XXX we leak memory.  Can't free loc with this API, though. */
-    /* dummy1 = gss_release_oid_set(&dummy2, &sap); */
+    (void)gss_release_oid_set(&dummy, &loc);
     return;
 }
 

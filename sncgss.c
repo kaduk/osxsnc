@@ -95,6 +95,10 @@ gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
     return;
 }
 
+/*
+ * The caller must free the OID set loc with gss_OID_set_loc_release() before
+ * exiting the shim layer.
+ */
 static void
 gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
 {
@@ -119,9 +123,32 @@ gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
 	e->length = s->length;
     }
     (*loc)->count = sap->count;
-    /* XXX we leak memory.  Can't free sap with this API, though. */
-    /* dummy1 = sapgss_release_oid_set(&dummy2, &sap); */
     return;
+}
+
+/*
+ * Free the memory associated with the gss_OID_set in the local GSS-API
+ * library's ABI that was allocated by the shim to call into the GSS-API
+ * library.
+ */
+static void
+gss_OID_set_loc_release(gss_OID_set *loc)
+{
+    gss_OID_set set;
+    gss_OID e;
+    size_t i;
+
+    if (loc == NULL || *loc == NULL)
+	return;
+
+    set = *loc;
+    for(i = 0; i < set->count; ++i) {
+	e = &set->elements[i];
+	free(e->elements);
+    }
+    free(set->elements);
+    free(set);
+    set = NULL;
 }
 
 static void
@@ -233,6 +260,8 @@ sapgss_acquire_cred(
 				    desired_mechs_loc, cred_usage,
 				    output_cred_handle, &actual_mechs_loc,
 				    time_rec);
+    /* Meet the gss_OID_set_sap_to_loc contract and free desired_mechs_loc */
+    gss_OID_set_loc_release(&desired_mechs_loc);
     /* Must inquire_cred to force resolution for the krb5 mech */
     if (major_status != 0)
 	return major_status;

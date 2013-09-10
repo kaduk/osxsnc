@@ -46,6 +46,9 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <assert.h>
+#include <pthread.h>
+#include <limits.h>
 #include <gssapi/gssapi.h>
 #include "sncgss.h"
 
@@ -57,6 +60,10 @@ sapgss_OID_desc gss_mech_krb5 =
     {9, "\052\206\110\206\367\022\001\002\002"};
 gss_OID_desc native_gss_mech_krb5 =
     {9, "\052\206\110\206\367\022\001\002\002"};
+
+/* The local cache of interned OIDs for returing to SAP. */
+static sapgss_OID *oid_cache;
+static pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Local helper routines */
 /*
@@ -92,20 +99,137 @@ gss_OID_loc_release(gss_OID *loc)
     *loc = NULL;
 }
 
+/* Helpers for managing the interned OID cache for gss_OID_loc_to_sap */
+static inline void
+lock_cache(void)
+{
+    int code;
+
+    code = pthread_mutex_lock(&cache_mutex);
+    assert(code == 0);
+}
+
+static inline void
+unlock_cache(void)
+{
+    int code;
+
+    code = pthread_mutex_unlock(&cache_mutex);
+    assert(code == 0);
+}
+
+static sapgss_OID
+cache_lookup_locked(gss_OID loc)
+{
+    sapgss_OID e;
+    int i;
+
+    /* We should assert that cache_mutex is locked.  Can we? */
+
+    if (oid_cache == NULL)
+	return NULL;
+
+    for(i = 0; oid_cache[i] != NULL; ++i) {
+	e = oid_cache[i];
+	if (e->length == loc->length &&
+	    memcmp(e->elements, loc->elements, e->length) == 0)
+	    return e;
+    }
+    return NULL;
+}
+
+static sapgss_OID
+cache_lookup(gss_OID loc)
+{
+    sapgss_OID o;
+
+    lock_cache();
+    o = cache_lookup_locked(loc);
+    unlock_cache();
+    return o;
+}
+
+/*
+ * Attempt to insert a sapgss_OID corresponding to the gss_OID loc into the
+ * cache.  If the OID can now be found in the cache (whether we put it there
+ * or it was already there due to some other thread), return 0, else return 1.
+ */
+static int
+cache_insert(gss_OID loc)
+{
+    sapgss_OID s, *p;
+    size_t len;
+
+    lock_cache();
+    if (cache_lookup_locked(loc) != NULL) {
+	unlock_cache();
+	return 0;
+    }
+
+    len = 0;
+    if (oid_cache != NULL)
+	for(len = 0; oid_cache[len] != NULL; ++len);
+
+    assert(len < SIZE_T_MAX / sizeof(sapgss_OID) - 3);
+    p = realloc(oid_cache, (len + 2) * sizeof(sapgss_OID));
+    if (p == NULL) {
+	unlock_cache();
+	return 1;
+    } else if (p != oid_cache) {
+	/* It worked, put it in place. */
+	oid_cache = p;
+    }
+
+    /* Copy the OID into new storage */
+    s = oid_cache[len] = malloc(sizeof(*s));
+    s->elements = malloc(loc->length);
+    memcpy(s->elements, loc->elements, loc->length);
+    s->length = loc->length;
+
+    /* terminate the list */
+    oid_cache[len+1] = NULL;
+
+    unlock_cache();
+    return 0;
+}
+
+/*
+ * When the local GSS-API library returns a single OID to the caller,
+ * this gss_OID is assumed to be a pointer to stable storage, and need
+ * not be freed by the caller.  We cannot return this structure directly
+ * to the caller, since it is in the incorrect ABI.  (Neither can we
+ * modify that stable storage directly, as it would break internal users
+ * of the OID, violate the hosts alignment expectations, attempt a write
+ * to immutable storage, or other bad things.)  We must return a translated
+ * copy instead.  However, to retain the "caller does not free" property,
+ * we must cache the values we hand out, and only ever allocate one OID
+ * structure in the SAP ABI for any given OID.
+ */
 static void
 gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
 {
+    sapgss_OID s;
+    int code;
+
     if (sap == NULL)
 	return;
     if (loc == NULL) {
 	*sap = NULL;
 	return;
     }
-    /* XXX memory leaks here, too. */
-    *sap = calloc(1, sizeof(**sap));
-    (*sap)->elements = malloc(loc->length);
-    memcpy((*sap)->elements, loc->elements, loc->length);
-    (*sap)->length = loc->length;
+    /* Try to find a cached copy to use. */
+    s = cache_lookup(loc);
+
+    if (s != NULL) {
+	*sap = s;
+	return;
+    } /* else */
+
+    /* Try to insert it into the cache.  Success here means that the next
+     * lookup will succeed. */
+    code = cache_insert(loc);
+    assert(code == 0);
+    *sap = cache_lookup(loc);
     return;
 }
 
@@ -235,6 +359,7 @@ sapsnc_init_adapter(struct sapgss_info_s *info, size_t len, int n)
     info->mutual_auth = 1;
     info->replay_prot = 1;
     info->mech_oid = &gss_mech_krb5;
+    pthread_mutex_init(&cache_mutex, NULL);
     return 0;
 }
 

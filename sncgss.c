@@ -59,6 +59,12 @@ gss_OID_desc native_gss_mech_krb5 =
     {9, "\052\206\110\206\367\022\001\002\002"};
 
 /* Local helper routines */
+/*
+ * Take an OID from the SAP ABI and generate a copy of it in the ABI
+ * expected by the local GSS-API library.  The caller is responsible for
+ * calling gss_OID_loc_release() to free storage allocated by this
+ * routine.
+ */
 static void
 gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 {
@@ -68,14 +74,22 @@ gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 	*loc = NULL;
 	return;
     }
-    /* XXX We should be using interned strings; single OIDs returned
-     * by the local library are generally not freed.  This version leaks
-     * memory. */
     *loc = calloc(1, sizeof(**loc));
     (*loc)->elements = malloc(sap->length);
     memcpy((*loc)->elements, sap->elements, sap->length);
     (*loc)->length = sap->length;
     return;
+}
+
+static void
+gss_OID_loc_release(gss_OID *loc)
+{
+    if (loc == NULL || *loc == NULL)
+	return;
+
+    free((*loc)->elements);
+    free(*loc);
+    *loc = NULL;
 }
 
 static void
@@ -318,6 +332,8 @@ sapgss_init_sec_context(
 					NULL, input_token,
 					&actual_mech_type_loc, output_token,
 	    				ret_flags, time_rec);
+    /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */
+    gss_OID_loc_release(&mech_type_loc);
     gss_OID_loc_to_sap(actual_mech_type_loc, actual_mech_type);
     return major_status;
 }
@@ -441,10 +457,15 @@ sapgss_display_status(
     gss_buffer_t status_string)
 {
     gss_OID mech_type_loc;
+    uint32_t major_status;
 
     gss_OID_sap_to_loc(mech_type, &mech_type_loc);
-    return gss_display_status(minor_status, status_value, status_type,
-			      mech_type_loc, message_context, status_string);
+    major_status = gss_display_status(minor_status, status_value, status_type,
+				      mech_type_loc, message_context,
+				      status_string);
+    /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */
+    gss_OID_loc_release(&mech_type_loc);
+    return major_status;
 }
 
 uint32_t
@@ -500,6 +521,8 @@ sapgss_import_name(
     gss_OID_sap_to_loc(input_name_type, &input_name_type_loc);
     major_status =  gss_import_name(minor_status, input_name_buffer,
 				    input_name_type_loc, output_name);
+    /* Comply with the gss_OID_sap_to_loc contract and free the OID */
+    gss_OID_loc_release(&input_name_type_loc);
     return major_status == GSS_S_NAME_NOT_MN ? GSS_S_BAD_NAMETYPE :
 					       major_status;
 }
@@ -580,6 +603,8 @@ sapgss_add_cred(
 				initiator_time_req, acceptor_time_req,
 				output_cred_handle, &actual_mechs_loc,
 				initiator_time_rec, acceptor_time_rec);
+    /* Comply with the gss_OID_sap_to_loc contract and free desired_mech_loc */
+    gss_OID_loc_release(&desired_mech_loc);
     gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
     return major_status;
 }
@@ -595,11 +620,16 @@ sapgss_inquire_cred_by_mech(
     gss_cred_usage_t *cred_usage)
 {
     gss_OID mech_type_loc;
+    uint32_t major_status;
 
     gss_OID_sap_to_loc(mech_type, &mech_type_loc);
-    return gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type_loc,
-				    name, initiator_lifetime,
-				    acceptor_lifetime, cred_usage);
+    major_status = gss_inquire_cred_by_mech(minor_status, cred_handle,
+					    mech_type_loc, name,
+					    initiator_lifetime,
+					    acceptor_lifetime, cred_usage);
+    /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */
+    gss_OID_loc_release(&mech_type_loc);
+    return major_status;
 }
 
 uint32_t
@@ -731,6 +761,8 @@ sapgss_inquire_names_for_mech(
     gss_OID_sap_to_loc(mechanism, &mechanism_loc);
     major_status = gss_inquire_names_for_mech(minor_status, mechanism_loc,
 					      &name_types_loc);
+    /* Comply with the gss_OID_sap_to_loc contract and free mechanism_loc */
+    gss_OID_loc_release(&mechanism_loc);
     gss_OID_set_loc_to_sap(name_types_loc, name_types);
     return major_status;
 }
@@ -758,10 +790,14 @@ sapgss_canonicalize_name(
     gss_name_t *output_name)
 {
     gss_OID mech_type_loc;
+    uint32_t major_status;
 
     gss_OID_sap_to_loc(mech_type, &mech_type_loc);
-    return gss_canonicalize_name(minor_status, input_name, mech_type_loc,
-				 output_name);
+    major_status = gss_canonicalize_name(minor_status, input_name,
+					 mech_type_loc, output_name);
+    /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */
+    gss_OID_loc_release(&mech_type_loc);
+    return major_status;
 }
 
 uint32_t

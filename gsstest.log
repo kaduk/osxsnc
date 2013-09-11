@@ -32,7 +32,7 @@ Timer resolution of gettimeofday() is (at least)      0.001 millisec
 1 second passed in   1000.000 millisec. 
 
 =====================================================================
-  Current Date&Time :  Wed, 04-Sep-2013   02:00:53   GMT +00:00
+  Current Date&Time :  Wed, 11-Sep-2013   15:56:17   GMT +00:00
   Operating System  :  Darwin
           -Release  :  12.4.0
   Hardware/Machine  :  Darwin
@@ -40,7 +40,7 @@ Timer resolution of gettimeofday() is (at least)      0.001 millisec
   scalar C-types    :  void* ptrdiff_t size_t time_t long int wchar_t char
     (sizes in bits) :    64     64s      64u    64s   64s 32s   32s    8u
   Endianess, Charset:  1234 (LITTLE_ENDIAN),  ASCII charset
-  Perf-Index (p-90) :  dbg= 44.50   (opt= 23.20)
+  Perf-Index (p-90) :  dbg= 42.40   (opt= 22.10)
   Timer Resolution  :  0.001 millisec using "gettimeofday()"
   Hostname          :  glossolalia.local
   Current user      :  kaduk
@@ -1948,7 +1948,7 @@ Finally ...
 
               supported SAP R/3 Releases : 3.1I, 4.0B, 4.5x, 4.6x
                              Mech Prefix : "krb5"       (ok)
-                             SAPGSS_ID   : 24729
+                             SAPGSS_ID   : 2
   Support for      context import/export : Yes       (ok)
   Support for      mutual authentication : Yes       (ok)
   Support for     data replay protection : Yes       (ok)
@@ -1958,11 +1958,14 @@ Finally ...
   canonical = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
   Private nametype OIDs:
      "p:" = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
+
+   Canonical Printable nametype OID: (SNC-INTERNAL USE ONLY)
+     (c:) = {1 2 840 113554 1 2 2 1}         NT= GSS_KRB5_NT_PRINCIPAL_NAME
 -------------------------------------------------------------
 
 
 =====================================================================
-  Current Date&Time :  Tue, 03-Sep-2013   22:00:57   GMT -04:00
+  Current Date&Time :  Wed, 11-Sep-2013   11:56:17   GMT -04:00
   Operating System  :  Darwin
           -Release  :  12.4.0
   Hardware/Machine  :  Darwin
@@ -1970,7 +1973,7 @@ Finally ...
   scalar C-types    :  void* ptrdiff_t size_t time_t long int wchar_t char
     (sizes in bits) :    64     64s      64u    64s   64s 32s   32s    8u
   Endianess, Charset:  1234 (LITTLE_ENDIAN),  ASCII charset
-  Perf-Index (p-90) :  dbg= 42.40   (opt= 22.10)
+  Perf-Index (p-90) :  dbg= 43.40   (opt= 22.60)
   Timer Resolution  :  0.001 millisec using "gettimeofday()"
   Hostname          :  glossolalia.local
   Current user      :  kaduk
@@ -1995,12 +1998,12 @@ Finally ...
 
 (( 2 a ))
 Performance of names management calls             min      avg      max :
-  gss_import_name()            (  880 calls)     0.00     0.01     0.14  ms
+  gss_import_name()            (  880 calls)     0.00     0.00     0.10  ms
   gss_display_name()           ( 1058 calls)     0.00     0.00     0.01  ms
   gss_export_name()            (  203 calls)     0.00     0.00     0.00  ms
-  gss_canonicalize_name()      (  820 calls)     0.00     0.00     0.39  ms
+  gss_canonicalize_name()      (  820 calls)     0.00     0.00     0.34  ms
   gss_compare_name()           (  207 calls)     0.00     0.00     0.00  ms
-  gss_release_name()           ( 1884 calls)     0.00     0.00     0.01  ms
+  gss_release_name()           ( 1884 calls)     0.00     0.00     0.03  ms
 
 (( 2 b ))
 Observed sizes of names:
@@ -2015,20 +2018,16 @@ Support of Hostbased Service Names:
 
 (( 3 a ))
 Performance of credential management calls        min      avg      max :
-  gss_acquire_cred() Ini       (   98 calls)     3.37     4.65   101.77  ms
-  gss_acquire_cred() Acc       (   90 calls)     0.43     0.55     2.01  ms
-  gss_inquire_cred() Ini       (    8 calls)     1.17     2.17     7.18  ms
-  gss_inquire_cred() Acc       (    3 calls)     0.37     0.40     0.43  ms
-  gss_release_cred()           (  188 calls)     0.00     0.00     0.31  ms
+  gss_acquire_cred() Ini       (   98 calls)     0.10     1.16    99.48  ms
+  gss_acquire_cred() Acc       (   90 calls)     0.29     1.74   128.52  ms
+  gss_inquire_cred() Ini       (    8 calls)     0.02     0.31     1.97  ms
+  gss_inquire_cred() Acc       (    3 calls)     0.34     0.54     0.95  ms
+  gss_release_cred()           (  188 calls)     0.00     0.00     0.30  ms
 
 (( 3 b ))
 Observed Credentials lifetime(s):
-                                Elapsed real time : 00h 00m 01s
-
-  Initiator credentials         lifetime decrease : 00h 00m 03s
-  Initiator credentials initial lifetime          : 09h 58m 58s
-  Initiator credentials final   lifetime          : 09h 58m 55s
-
+                                Elapsed real time : Expired
+  Initiator credentials lifetime constant at      : 09h 59m 54s
   Acceptor  credentials lifetime constant at      : Indefinite
 
 ----------
@@ -2044,14 +2043,14 @@ Security Context Attribute results:
      provided   = (MUTUAL,REPLAY,CONF,INTEG,TRANS)
 
 Performance of context establishment calls        min      avg      max :
-  gss_init_sec_context()   #1  (   11 calls)     3.44   197.08  2132.49  ms
-  gss_init_sec_context()   #2  (   10 calls)     0.03     0.03     0.05  ms
-  gss_accept_sec_context() #1  (   11 calls)     0.09     0.21     0.35  ms
+  gss_init_sec_context()   #1  (   11 calls)     0.83     2.39    17.30  ms
+  gss_init_sec_context()   #2  (   10 calls)     0.03     0.03     0.03  ms
+  gss_accept_sec_context() #1  (   11 calls)     0.08     0.17     0.21  ms
 
 (( 4 c ))
 Total context establishment overhead              min      avg      max :
-  gss_init_sec_context()       (   10 calls)     3.47   197.11  2132.53  ms
-  gss_accept_sec_context()     (   10 calls)     0.09     0.21     0.35  ms
+  gss_init_sec_context()       (   10 calls)     0.86     2.42    17.33  ms
+  gss_accept_sec_context()     (   10 calls)     0.08     0.17     0.21  ms
   gss_delete_sec_context()     (   22 calls)     0.00     0.01     0.02  ms
   gss_inquire_context()        (   82 calls)     0.00     0.00     0.01  ms
 
@@ -2059,15 +2058,9 @@ Total context establishment overhead              min      avg      max :
 (( 4 d ))
 Observed initial lifetimes for established security contexts:
 
-                             Elapsed real time : 00h 00m 01s
-
-  Initiator context         lifetimes decrease : 00h 00m 01s
-  Initiator context initial lifetime           : 09h 58m 56s
-  Initiator context final   lifetime           : 09h 58m 55s
-
-  Acceptor  context         lifetimes decrease : 00h 00m 01s
-  Acceptor  context initial lifetime           : 09h 58m 56s
-  Acceptor  context final   lifetime           : 09h 58m 55s
+                             Elapsed real time : Expired
+  Initiator context lifetimes constant at      : 09h 59m 54s
+  Acceptor  context lifetimes constant at      : 09h 59m 54s
 
 (( 4 e ))
 Observed token sizes for    gss_init_sec_context():  [ 576 .. 593 ]  bytes
@@ -2079,10 +2072,10 @@ Security context transfer: 32 context transfers, 1 cross-process
 
 (( 5 a ))
 Performance of security context transfer          min      avg      max :
-  gss_export_sec_context() Ini (   17 calls)     0.01     0.01     0.02  ms
+  gss_export_sec_context() Ini (   17 calls)     0.01     0.01     0.01  ms
   gss_export_sec_context() Acc (   24 calls)     0.01     0.01     0.02  ms
-  gss_import_sec_context() Ini (   17 calls)     0.01     0.01     0.01  ms
-  gss_import_sec_context() Acc (   24 calls)     0.01     0.01     0.02  ms
+  gss_import_sec_context() Ini (   17 calls)     0.01     0.01     0.02  ms
+  gss_import_sec_context() Acc (   24 calls)     0.00     0.01     0.01  ms
 
 
 (( 5 b ))
@@ -2099,16 +2092,16 @@ Confidentiality and Integrity
 (( 6 b ))
 Performance of per-message calls                  min      avg      max :
   gss_context_time()           (  266 calls)     0.00     0.00     0.00  ms
-  gss_wrap_size_limit()        ( 7798 calls)     0.00     0.00     0.01  ms
+  gss_wrap_size_limit()        ( 7798 calls)     0.00     0.00     0.20  ms
 
 (( 6 c ))
 Message protection throughput         avg     max :
-  gss_getmic()        (  781 calls) 273.5   647.6  KByte/msec  min= 0.00 ms
-  gss_verifymic()     (  770 calls) 289.3   647.6  KByte/msec  min= 0.00 ms
-  gss_wrap(mic)       (  771 calls) 248.7   593.7  KByte/msec  min= 0.00 ms
-  gss_unwrap(mic)     (  756 calls) 285.4   647.5  KByte/msec  min= 0.00 ms
-  gss_wrap(conf)      (  790 calls)  44.8   169.6  KByte/msec  min= 0.02 ms
-  gss_unwrap(conf)    (  778 calls) 196.1   474.9  KByte/msec  min= 0.00 ms
+  gss_getmic()        (  781 calls) 274.6   630.8  KByte/msec  min= 0.00 ms
+  gss_verifymic()     (  770 calls) 284.4   630.5  KByte/msec  min= 0.00 ms
+  gss_wrap(mic)       (  771 calls) 249.0   585.4  KByte/msec  min= 0.00 ms
+  gss_unwrap(mic)     (  756 calls) 284.2   630.8  KByte/msec  min= 0.00 ms
+  gss_wrap(conf)      (  790 calls)  47.9   182.1  KByte/msec  min= 0.01 ms
+  gss_unwrap(conf)    (  778 calls) 196.3   455.4  KByte/msec  min= 0.00 ms
 
 
 (( 6 d ))
@@ -2120,10 +2113,10 @@ Message size increase for gss_wrap(conf):  [ 60 .. 60 ]  bytes
 
 (( 7 a ))
 Performance of remaining GSS-API calls            min      avg      max :
-  gss_display_status()         (  368 calls)     0.00     0.00     0.01  ms
-  gss_release_buffer()         ( 8047 calls)     0.00     0.00     0.00  ms
+  gss_display_status()         (  368 calls)     0.00     0.00     0.00  ms
+  gss_release_buffer()         ( 8047 calls)     0.00     0.00     0.01  ms
   gss_release_oid_set()        (    9 calls)     0.00     0.00     0.00  ms
-  gss_indicate_mechs()         (    2 calls)     0.00     0.18     0.36  ms
+  gss_indicate_mechs()         (    2 calls)     0.00     0.03     0.06  ms
 
 ----------
 Displaying of status information via gss_display_status():

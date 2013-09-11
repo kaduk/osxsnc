@@ -46,6 +46,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include <assert.h>
 #include <pthread.h>
 #include <limits.h>
@@ -71,21 +72,30 @@ static pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
  * expected by the local GSS-API library.  The caller is responsible for
  * calling gss_OID_loc_release() to free storage allocated by this
  * routine.
+ *
+ * Returns 0 (success) or errno from allocation failure.
  */
-static void
+static int
 gss_OID_sap_to_loc(sapgss_OID sap, gss_OID *loc)
 {
     if (loc == NULL)
-	return;
+	return 0;
     if (sap == NULL) {
 	*loc = NULL;
-	return;
+	return 0;
     }
     *loc = calloc(1, sizeof(**loc));
+    if (*loc == NULL)
+	return errno;
     (*loc)->elements = malloc(sap->length);
+    if ((*loc)->elements == NULL) {
+	free(*loc);
+	*loc = NULL;
+	return ENOMEM;
+    }
     memcpy((*loc)->elements, sap->elements, sap->length);
     (*loc)->length = sap->length;
-    return;
+    return 0;;
 }
 
 static void
@@ -152,7 +162,8 @@ cache_lookup(gss_OID loc)
 /*
  * Attempt to insert a sapgss_OID corresponding to the gss_OID loc into the
  * cache.  If the OID can now be found in the cache (whether we put it there
- * or it was already there due to some other thread), return 0, else return 1.
+ * or it was already there due to some other thread), return 0,
+ * else return errno from the failed malloc.
  */
 static int
 cache_insert(gss_OID loc)
@@ -174,7 +185,7 @@ cache_insert(gss_OID loc)
     p = realloc(oid_cache, (len + 2) * sizeof(sapgss_OID));
     if (p == NULL) {
 	unlock_cache();
-	return 1;
+	return ENOMEM;
     } else if (p != oid_cache) {
 	/* It worked, put it in place. */
 	oid_cache = p;
@@ -182,7 +193,16 @@ cache_insert(gss_OID loc)
 
     /* Copy the OID into new storage */
     s = oid_cache[len] = malloc(sizeof(*s));
+    if (s == NULL) {
+	/* The failed allocation did the NULL-termination already. */
+	return errno;
+    }
     s->elements = malloc(loc->length);
+    if (s->elements == NULL) {
+	free(s);
+	oid_cache[len] = NULL;
+	return ENOMEM;
+    }
     memcpy(s->elements, loc->elements, loc->length);
     s->length = loc->length;
 
@@ -204,40 +224,47 @@ cache_insert(gss_OID loc)
  * copy instead.  However, to retain the "caller does not free" property,
  * we must cache the values we hand out, and only ever allocate one OID
  * structure in the SAP ABI for any given OID.
+ *
+ * Returns 0 on success, and errno on failure.
  */
-static void
+static int
 gss_OID_loc_to_sap(gss_OID loc, sapgss_OID *sap)
 {
     sapgss_OID s;
     int code;
 
     if (sap == NULL)
-	return;
+	return 0;
     if (loc == NULL) {
 	*sap = NULL;
-	return;
+	return 0;
     }
     /* Try to find a cached copy to use. */
     s = cache_lookup(loc);
 
     if (s != NULL) {
 	*sap = s;
-	return;
+	return 0;
     } /* else */
 
     /* Try to insert it into the cache.  Success here means that the next
      * lookup will succeed. */
     code = cache_insert(loc);
-    assert(code == 0);
+    if (code != 0) {
+	*sap = NULL;
+	return code;
+    }
     *sap = cache_lookup(loc);
-    return;
+    return 0;
 }
 
 /*
  * The caller must free the OID set loc with gss_OID_set_loc_release() before
  * exiting the shim layer.
+ *
+ * Returns 0 on success, errno on failure.
  */
-static void
+static int
 gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
 {
     sapgss_OID s;
@@ -245,23 +272,44 @@ gss_OID_set_sap_to_loc(sapgss_OID_set sap, gss_OID_set *loc)
     size_t i;
 
     if (loc == NULL)
-	return;
+	return 0;
     if (sap == NULL) {
 	*loc = NULL;
-	return;
+	return 0;
     }
 
     *loc = calloc(1, sizeof(**loc));
+    if (*loc == NULL)
+	return errno;
     (*loc)->elements = calloc(sap->count, sizeof(gss_OID_desc));
+    if ((*loc)->elements == NULL) {
+	free(*loc);
+	*loc = NULL;
+	return ENOMEM;
+    }
     for(i = 0; i < sap->count; ++i) {
 	s = &sap->elements[i];
 	e = &(*loc)->elements[i];
 	e->elements = malloc(s->length);
+	if (e->elements == NULL)
+	    goto looperr;
 	memcpy(e->elements, s->elements, s->length);
 	e->length = s->length;
     }
     (*loc)->count = sap->count;
-    return;
+    return 0;
+
+looperr:
+    for(i = 0; i < sap->count; ++i) {
+	e = &(*loc)->elements[i];
+	if (e->elements == NULL)
+	    break;
+	free(e->elements);
+    }
+    free((*loc)->elements);
+    free(*loc);
+    *loc = NULL;
+    return ENOMEM;
 }
 
 /*
@@ -296,8 +344,10 @@ gss_OID_set_loc_release(gss_OID_set *loc)
  * the storage which was allocated by the GSS-API library (since that
  * storage will never be exposed to the application and will otherwise be
  * leaked).
+ *
+ * Returns 0 on success, errno on failure.
  */
-static void
+static int
 gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
 {
     sapgss_OID s;
@@ -306,24 +356,46 @@ gss_OID_set_loc_to_sap(gss_OID_set loc, sapgss_OID_set *sap)
     uint32_t dummy;
 
     if (sap == NULL)
-	return;
+	return 0;
     if (loc == NULL) {
 	*sap = NULL;
-	return;
+	return 0;
     }
 
     *sap = calloc(1, sizeof(**sap));
+    if (*sap == NULL)
+	return errno;
     (*sap)->elements = calloc(loc->count, sizeof(sapgss_OID_desc));
+    if ((*sap)->elements == NULL) {
+	free(*sap);
+	*sap = NULL;
+	return ENOMEM;
+    }
     for(i = 0; i < loc->count; ++i) {
 	e = &loc->elements[i];
 	s = &(*sap)->elements[i];
 	s->elements = malloc(e->length);
+	if (s->elements == NULL)
+	    goto looperr;
 	memcpy(s->elements, e->elements, e->length);
 	s->length = e->length;
     }
     (*sap)->count = loc->count;
     (void)gss_release_oid_set(&dummy, &loc);
-    return;
+    return 0;
+
+looperr:
+    for(i = 0; i < loc->count; ++i) {
+	s = &(*sap)->elements[i];
+	if (s->elements == NULL)
+	    break;
+	free(s->elements);
+    }
+    free((*sap)->elements);
+    free(*sap);
+    *sap = NULL;
+    (void)gss_release_oid_set(&dummy, &loc);
+    return ENOMEM;
 }
 
 static void
@@ -399,10 +471,15 @@ sapgss_acquire_cred(
     gss_OID_set desired_mechs_loc;
     gss_OID_set actual_mechs_loc;
     uint32_t major_status, dummy;
+    int ret;
     
     memset(&desired_mechs_loc, 0, sizeof(desired_mechs_loc));
     memset(&actual_mechs_loc, 0, sizeof(actual_mechs_loc));
-    gss_OID_set_sap_to_loc(desired_mechs, &desired_mechs_loc);
+    ret = gss_OID_set_sap_to_loc(desired_mechs, &desired_mechs_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_acquire_cred(minor_status, desired_name, time_req,
 				    desired_mechs_loc, cred_usage,
 				    output_cred_handle, &actual_mechs_loc,
@@ -414,7 +491,11 @@ sapgss_acquire_cred(
 	return major_status;
     (void)gss_inquire_cred(&dummy, *output_cred_handle,
 				    NULL, NULL, NULL, &actual_mechs_loc);
-    gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    ret = gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -444,13 +525,18 @@ sapgss_init_sec_context(
 {
     gss_OID mech_type_loc, actual_mech_type_loc;
     uint32_t major_status;
+    int ret;
 
     memset(&mech_type_loc, 0, sizeof(mech_type_loc));
     actual_mech_type_loc = NULL;
     /* Hope nobody uses these */
     if (input_chan_bindings != NULL)
 	return GSS_S_FAILURE;
-    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    ret = gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_init_sec_context(minor_status, claimant_cred_handle,
 					context_handle, target_name,
 					mech_type_loc, req_flags, time_req,
@@ -459,7 +545,11 @@ sapgss_init_sec_context(
 	    				ret_flags, time_rec);
     /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */
     gss_OID_loc_release(&mech_type_loc);
-    gss_OID_loc_to_sap(actual_mech_type_loc, actual_mech_type);
+    ret = gss_OID_loc_to_sap(actual_mech_type_loc, actual_mech_type);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -479,6 +569,7 @@ sapgss_accept_sec_context(
 {
     gss_OID mech_type_loc;
     uint32_t major_status;
+    int ret;
 
     memset(&mech_type_loc, 0, sizeof(mech_type_loc));
     if (input_chan_bindings != NULL)
@@ -489,7 +580,11 @@ sapgss_accept_sec_context(
 					  NULL, src_name, &mech_type_loc,
 					  output_token, ret_flags, time_rec,
 					  delegated_cred_handle);
-    gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    ret = gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -583,8 +678,13 @@ sapgss_display_status(
 {
     gss_OID mech_type_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    ret = gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_display_status(minor_status, status_value, status_type,
 				      mech_type_loc, message_context,
 				      status_string);
@@ -600,10 +700,15 @@ sapgss_indicate_mechs(
 {
     gss_OID_set mech_set_loc;
     uint32_t major_status;
+    int ret;
 
     memset(&mech_set_loc, 0, sizeof(mech_set_loc));
     major_status = gss_indicate_mechs(minor_status, &mech_set_loc);
-    gss_OID_set_loc_to_sap(mech_set_loc, mech_set);
+    ret = gss_OID_set_loc_to_sap(mech_set_loc, mech_set);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -626,10 +731,15 @@ sapgss_display_name(
 {
     gss_OID output_name_type_loc;
     uint32_t major_status;
+    int ret;
 
     major_status = gss_display_name(minor_status, input_name,
 				    output_name_buffer, &output_name_type_loc);
-    gss_OID_loc_to_sap(output_name_type_loc, output_name_type);
+    ret = gss_OID_loc_to_sap(output_name_type_loc, output_name_type);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -642,8 +752,13 @@ sapgss_import_name(
 {
     gss_OID input_name_type_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(input_name_type, &input_name_type_loc);
+    ret = gss_OID_sap_to_loc(input_name_type, &input_name_type_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status =  gss_import_name(minor_status, input_name_buffer,
 				    input_name_type_loc, output_name);
     /* Comply with the gss_OID_sap_to_loc contract and free the OID */
@@ -697,10 +812,15 @@ sapgss_inquire_cred(
 {
     gss_OID_set mechanisms_loc;
     uint32_t major_status;
+    int ret;
 
     major_status = gss_inquire_cred(minor_status, cred_handle, name, lifetime,
 				    cred_usage, &mechanisms_loc);
-    gss_OID_set_loc_to_sap(mechanisms_loc, mechanisms);
+    ret = gss_OID_set_loc_to_sap(mechanisms_loc, mechanisms);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -721,8 +841,13 @@ sapgss_add_cred(
     gss_OID desired_mech_loc;
     gss_OID_set actual_mechs_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(desired_mech, &desired_mech_loc);
+    ret = gss_OID_sap_to_loc(desired_mech, &desired_mech_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_add_cred(minor_status, input_cred_handle, desired_name,
 				desired_mech_loc, cred_usage,
 				initiator_time_req, acceptor_time_req,
@@ -730,7 +855,11 @@ sapgss_add_cred(
 				initiator_time_rec, acceptor_time_rec);
     /* Comply with the gss_OID_sap_to_loc contract and free desired_mech_loc */
     gss_OID_loc_release(&desired_mech_loc);
-    gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    ret = gss_OID_set_loc_to_sap(actual_mechs_loc, actual_mechs);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -746,8 +875,13 @@ sapgss_inquire_cred_by_mech(
 {
     gss_OID mech_type_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    ret = gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_inquire_cred_by_mech(minor_status, cred_handle,
 					    mech_type_loc, name,
 					    initiator_lifetime,
@@ -771,11 +905,16 @@ sapgss_inquire_context(
 {
     gss_OID mech_type_loc;
     uint32_t major_status;
+    int ret;
 
     major_status = gss_inquire_context(minor_status, context_handle, src_name,
 				       targ_name, lifetime_rec, &mech_type_loc,
 				       ctx_flags, locally_initiated, open);
-    gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    ret = gss_OID_loc_to_sap(mech_type_loc, mech_type);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     *mech_type = &gss_mech_krb5;
     return major_status;
 }
@@ -821,11 +960,14 @@ sapgss_create_empty_oid_set(
     sapgss_OID_set *oid_set)
 {
     oid_set = calloc(1, sizeof(*oid_set));
+    if (oid_set == NULL) {
+	*minor_status = errno;
+	return GSS_S_FAILURE;
+    }
     *minor_status = 0;
     return GSS_S_COMPLETE;
 }
 
-/* Assumes [mc]alloc() never fails */
 uint32_t
 sapgss_add_oid_set_member(
     uint32_t *minor_status,
@@ -839,9 +981,20 @@ sapgss_add_oid_set_member(
     count = (*oid_set)->count;
     /* calloc does overflow checking */
     (*oid_set)->elements = calloc(count, sizeof(sapgss_OID_desc));
+    if ((*oid_set)->elements == NULL) {
+	(*oid_set)->elements = list;
+	*minor_status = ENOMEM;
+	return GSS_S_FAILURE;
+    }
     memcpy((*oid_set)->elements, list, count * sizeof(sapgss_OID_desc));
     last = &(*oid_set)->elements[count];
     last->elements = malloc(member_oid->length);
+    if (last->elements == NULL) {
+	free((*oid_set)->elements);
+	(*oid_set)->elements = list;
+	*minor_status = ENOMEM;
+	return GSS_S_FAILURE;
+    }
     memcpy(last->elements, member_oid->elements, member_oid->length);
     last->length = member_oid->length;
     (*oid_set)->count++;
@@ -882,13 +1035,22 @@ sapgss_inquire_names_for_mech(
     gss_OID mechanism_loc;
     gss_OID_set name_types_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(mechanism, &mechanism_loc);
+    ret = gss_OID_sap_to_loc(mechanism, &mechanism_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_inquire_names_for_mech(minor_status, mechanism_loc,
 					      &name_types_loc);
     /* Comply with the gss_OID_sap_to_loc contract and free mechanism_loc */
     gss_OID_loc_release(&mechanism_loc);
-    gss_OID_set_loc_to_sap(name_types_loc, name_types);
+    ret = gss_OID_set_loc_to_sap(name_types_loc, name_types);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -900,10 +1062,15 @@ sapgss_inquire_mechs_for_name(
 {
     gss_OID_set mech_types_loc;
     uint32_t major_status;
+    int ret;
 
     major_status = gss_inquire_mechs_for_name(minor_status, input_name,
 					      &mech_types_loc);
-    gss_OID_set_loc_to_sap(mech_types_loc, mech_types);
+    ret = gss_OID_set_loc_to_sap(mech_types_loc, mech_types);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     return major_status;
 }
 
@@ -916,8 +1083,13 @@ sapgss_canonicalize_name(
 {
     gss_OID mech_type_loc;
     uint32_t major_status;
+    int ret;
 
-    gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    ret = gss_OID_sap_to_loc(mech_type, &mech_type_loc);
+    if (ret != 0) {
+	*minor_status = ret;
+	return GSS_S_FAILURE;
+    }
     major_status = gss_canonicalize_name(minor_status, input_name,
 					 mech_type_loc, output_name);
     /* Comply with the gss_OID_sap_to_loc contract and free mech_type_loc */

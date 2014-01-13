@@ -50,7 +50,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <limits.h>
-#include <gssapi/gssapi.h>
+#include <GSS/gssapi.h>
 #include "sncgss.h"
 
 /* GSS_KRB5_NT_PRINCIPAL_NAME */
